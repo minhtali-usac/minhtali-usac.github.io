@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAB ẢO THÍ NGHIỆM PHÁT XẠ TẠO CỰC QUANG</title>
+<style>
+:root {
+  --bg: #06090f;
+  --bg2: #0d1220;
+  --bg3: #111928;
+  --card: #131d2e;
+  --card2: #1a2540;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8edf5;
+  --muted: #8c9fb5;
+  --dim: #5c6c80;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; font-size: 18px; }
+
+.page { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* ── Header ── */
+.hero { text-align: center; padding: 2.5rem 0 2.5rem; }
+.hero-eyebrow { font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: .8rem; }
+.hero-title { font-size: 2.8rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .8rem; }
+.hero-title span { color: #52d09a; }
+.hero-sub { font-size: 1.15rem; color: var(--muted); max-width: 600px; margin: 0 auto 1.8rem; }
+.hero-pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 800px; margin: 0 auto;}
+.pill { font-size: 0.9rem; padding: 6px 14px; border-radius: 20px; border: 1px solid; font-weight: 500; letter-spacing: .04em; }
+
+/* ── Sky canvas ── */
+.sky-wrap { position: relative; border-radius: 14px; overflow: hidden; margin-bottom: 2rem; border: 1px solid var(--border); }
+#sky { display: block; width: 100%; cursor: crosshair; }
+.sky-hint { position: absolute; bottom: 12px; right: 16px; font-size: 0.85rem; color: rgba(255,255,255,.5); pointer-events: none; }
+.sky-label { position: absolute; top: 14px; left: 16px; font-size: 0.85rem; color: rgba(255,255,255,.6); letter-spacing: .06em; text-transform: uppercase; font-weight: 600;}
+
+/* ── Two-column layout ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 2rem; }
+@media(max-width:768px){ .two-col { grid-template-columns: 1fr; } }
+
+/* ── Source toggles ── */
+.sources-panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+.panel-label { font-size: 0.9rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; font-weight: 700; }
+.src-list { display: flex; flex-direction: column; gap: 8px; max-height: 350px; overflow-y: auto; padding-right: 5px; }
+.src-list::-webkit-scrollbar { width: 6px; }
+.src-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.src-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; transition: all .12s; user-select: none; }
+.src-row:hover { background: var(--card2); border-color: var(--border2); }
+.src-row.off { opacity: .4; }
+.src-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.src-name { font-size: 1.05rem; font-weight: 600; flex: 1; }
+.src-desc { font-size: 0.85rem; color: var(--muted); }
+.src-count { font-size: 0.85rem; background: var(--bg3); padding: 3px 9px; border-radius: 12px; color: var(--muted); font-weight: bold;}
+
+/* ── Info panel ── */
+.info-panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.stat { background: var(--bg3); border-radius: 8px; padding: 12px 14px; }
+.stat-val { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+.stat-key { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+
+/* ── Spectrum ── */
+.spec-section { margin-bottom: 2rem; }
+.spec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; }
+.spec-title { font-size: 0.95rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.spec-wrap { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+#spec { display: block; width: 100%; }
+.nm-axis { display: flex; justify-content: space-between; padding: 6px 0 0; font-size: 0.85rem; color: var(--dim); }
+
+/* ── Tooltip ── */
+.tooltip { background: var(--card2); border: 1px solid var(--border2); border-radius: 9px; padding: 12px 16px; font-size: 0.9rem; margin-top: 10px; min-height: 60px; transition: all .1s; }
+.tt-nm { font-size: 1.3rem; font-weight: 700; }
+.tt-row { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.tt-badge { font-size: 0.85rem; padding: 3px 10px; border-radius: 6px; background: var(--bg3); color: var(--text); }
+.tt-desc { font-size: 0.95rem; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+/* ── Line cards ── */
+.cards-section { }
+.cards-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.ftab { font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: all .1s; color: var(--muted); background: transparent; font-family: inherit; font-weight: 600;}
+.ftab.active { color: var(--text); background: var(--card2); border-color: var(--border2); }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.lcard { background: var(--card); border-radius: 10px; padding: 14px 16px; border-left: 4px solid; border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: all .12s; cursor: pointer; }
+.lcard:hover { background: var(--card2); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.lcard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.lcard-nm { font-size: 1.25rem; font-weight: 700; }
+.lcard-src { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; background: var(--bg3); color: var(--muted); font-weight: 600; text-transform: uppercase; }
+.lcard-ion { font-size: 0.9rem; color: var(--text); margin-bottom: 6px; font-weight: 500;}
+.lcard-desc { font-size: 0.85rem; color: #8899aa; line-height: 1.5; }
+.lcard-foot { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.lc-badge { font-size: 0.8rem; padding: 3px 8px; border-radius: 5px; font-weight: 600; }
+
+/* ── Physics section ── */
+.physics { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-top: 2rem; }
+.physics h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: .8rem; color: var(--text); text-transform: uppercase; }
+.physics p { font-size: 0.95rem; color: var(--muted); line-height: 1.7; margin-bottom: 1rem; }
+.eq-box { background: var(--bg3); border-radius: 8px; padding: 1.2rem; text-align: center; margin: 1rem 0; border: 1px solid var(--border2); }
+.eq { font-size: 1.6rem; font-weight: 700; letter-spacing: .03em; color: #52d09a; }
+.eq-sub { font-size: 0.9rem; color: var(--muted); margin-top: 8px; }
+.phys-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 1.5rem;}
+.phys-card { background: var(--bg3); border-radius: 8px; padding: 12px 14px; border: 1px solid var(--border); }
+.phys-sym { font-size: 1.3rem; font-weight: 700; color: #a0c8f8; }
+.phys-name { font-size: 0.9rem; color: var(--muted); margin-top: 2px; }
+.phys-val { font-size: 1rem; color: var(--text); margin-top: 4px; font-family: monospace; font-weight: bold;}
+
+/* ── Interactive Calc ── */
+.calc-box { background: var(--card2); border: 1px solid #52d09a55; border-radius: 10px; padding: 1.2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(82, 208, 154, 0.1); }
+.calc-box-title { font-size: 1rem; font-weight: 700; color: #52d09a; margin-bottom: 12px; text-transform: uppercase;}
+.calc-flex { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.calc-input-wrap { display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+.calc-input-wrap input { width: 90px; padding: 8px; font-size: 1rem; font-family: monospace; border-radius: 6px; border: 1px solid var(--border2); background: var(--bg); color: #fff; font-weight: bold;}
+.calc-result { font-size: 1.05rem; }
+.calc-result span { font-family: monospace; font-weight: bold; font-size: 1.2rem; }
+
+.app-list { list-style: none; padding-left: 0; margin-top: 10px; }
+.app-list li { font-size: 0.95rem; color: var(--muted); margin-bottom: 10px; padding-left: 16px; position: relative; }
+.app-list li::before { content: "•"; position: absolute; left: 0; color: #52d09a; font-size: 1.2rem; line-height: 1; }
+
+/* ── Divider ── */
+.divider { border: none; border-top: 1px dashed var(--border2); margin: 2rem 0; }
+
+/* ── Footnote ── */
+.footnote { text-align: center; padding: 2rem; color: var(--dim); font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-eyebrow">CÂU LẠC BỘ THIÊN VĂN USAC</div>
+    <div class="hero-title">WEB HỌC TẬP PHÁT XẠ - CỰC QUANG</div>
+    <div class="hero-sub">Phân tích "Dấu vân tay" ánh sáng của các nguyên tố hóa học</div>
+    <div class="hero-pills">
+      <span class="pill" style="color:#52d09a;border-color:#52d09a44">O - Oxygen</span>
+      <span class="pill" style="color:#8888ee;border-color:#8888ee44">N₂ - Nitrogen</span>
+      <span class="pill" style="color:#55ccee;border-color:#55ccee44">H - Hydrogen</span>
+      <span class="pill" style="color:#44aaff;border-color:#44aaff44">Cu - Copper</span>
+      <span class="pill" style="color:#ffaa44;border-color:#ffaa4444">Fe - Iron</span>
+      <span class="pill" style="color:#ff9944;border-color:#ff994444">Na - Sodium</span>
+      <span class="pill" style="color:#ff3366;border-color:#ff336644">Li - Lithium</span>
+      <span class="pill" style="color:#cc66ff;border-color:#cc66ff44">K - Potassium</span>
+      <span class="pill" style="color:#ff6600;border-color:#ff660044">Ca - Calcium</span>
+      <span class="pill" style="color:#cc0033;border-color:#cc003344">Sr - Strontium</span>
+      <span class="pill" style="color:#99ff33;border-color:#99ff3344">Ba - Barium</span>
+    </div>
+  </div>
+
+  <div class="sky-wrap">
+    <canvas id="sky" height="280"></canvas>
+    <div class="sky-label">Mô phỏng ngọn lửa & cực quang</div>
+    <div class="sky-hint">Di chuột để tương tác</div>
+  </div>
+
+  <div class="two-col">
+    <div class="sources-panel">
+      <div class="panel-label">Nguồn phát xạ (Bật / Tắt)</div>
+      <div class="src-list" id="src-list"></div>
+    </div>
+    <div class="info-panel">
+      <div class="panel-label">Thông tin quang phổ</div>
+      <div class="stat-grid" id="stat-grid"></div>
+    </div>
+  </div>
+
+  <div class="spec-section">
+    <div class="spec-header">
+      <div class="spec-title">Quang phổ phát xạ (380 – 780 nm)</div>
+    </div>
+    <div class="spec-wrap"><canvas id="spec" height="140"></canvas></div>
+    <div class="nm-axis">
+      <span>380 nm</span><span>430</span><span>480</span><span>530</span><span>580</span><span>630</span><span>680</span><span>730</span><span>780 nm</span>
+    </div>
+    <div class="tooltip" id="tooltip"><span style="color:var(--muted);font-size:.9rem">Hover lên quang phổ để xem chi tiết vạch phát xạ.</span></div>
+  </div>
+
+  <div class="cards-section">
+    <div class="cards-header">
+      <div class="spec-title">Các vạch phát xạ nổi bật (Click để tính Năng lượng)</div>
+      <div class="filter-tabs" id="filter-tabs"></div>
+    </div>
+    <div class="cards-grid" id="cards-grid"></div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="physics" id="physics-section">
+    <h3>Nguyên lý vật lý - Sự kích thích electron</h3>
+    <p>Khi electron nhận năng lượng (từ nhiệt của ngọn lửa hoặc sự va chạm của các hạt gió Mặt Trời), nó nhảy lên mức năng lượng cao hơn. Trạng thái này không bền - electron nhanh chóng rơi trở lại quỹ đạo cũ, giải phóng ra một photon có năng lượng đúng bằng hiệu năng lượng giữa hai mức. Bước sóng của photon đó chính là "dấu vân tay" đặc trưng của từng nguyên tố.</p>
+    
+    <div class="eq-box">
+      <div class="eq">ΔE = E₂ − E₁ = h·f = h·c / λ</div>
+      <div class="eq-sub">Năng lượng photon phát ra = hiệu năng lượng hai mức electron</div>
+    </div>
+
+    <div class="calc-box">
+      <div class="calc-box-title">⚡ Máy tính năng lượng Photon Interactive</div>
+      <div class="calc-flex">
+        <div class="calc-input-wrap">
+          <label for="calc-lam">Bước sóng λ:</label>
+          <input type="number" id="calc-lam" value="557.7" step="0.1" oninput="updateCalc()"> nm
+        </div>
+        <div style="color:var(--dim); font-size:1.5rem;">|</div>
+        <div class="calc-result">
+          Tần số (f) ≈ <span id="calc-f" style="color:#a0c8f8;"></span> Hz
+        </div>
+        <div style="color:var(--dim); font-size:1.5rem;">|</div>
+        <div class="calc-result">
+          Năng lượng (ΔE) ≈ <span id="calc-e" style="color:#ffaa44;"></span> eV
+        </div>
+      </div>
+      <div style="font-size:0.85rem; color:var(--muted); margin-top:10px; font-style:italic;">* Mẹo: Click vào bất kỳ thẻ vạch phổ nào ở trên để tự động điền bước sóng vào máy tính này.</div>
+    </div>
+
+    <div class="phys-grid">
+      <div class="phys-card"><div class="phys-sym">h</div><div class="phys-name">Hằng số Planck</div><div class="phys-val">6.626 × 10⁻³⁴ J·s</div></div>
+      <div class="phys-card"><div class="phys-sym">c</div><div class="phys-name">Tốc độ ánh sáng</div><div class="phys-val">2.998 × 10⁸ m/s</div></div>
+      <div class="phys-card"><div class="phys-sym">λ</div><div class="phys-name">Bước sóng</div><div class="phys-val">380 – 780 nm (khả kiến)</div></div>
+      <div class="phys-card"><div class="phys-sym">1 eV</div><div class="phys-name">Electronvolt -> Joule</div><div class="phys-val">1.602 × 10⁻¹⁹ J</div></div>
+    </div>
+
+    <hr class="divider">
+
+    <h3>Ứng dụng thực tiễn của Quang Phổ Phát Xạ</h3>
+    <ul class="app-list">
+      <li><b>Thiên văn học (Spectroscopy):</b> Ánh sáng là nguồn thông tin duy nhất từ các vì sao. Bằng cách phân tích vạch quang phổ, các nhà thiên văn học xác định được thành phần hóa học, nhiệt độ, và tốc độ di chuyển của các thiên hà cách chúng ta hàng tỷ năm ánh sáng.</li>
+      <li><b>Công nghệ Pháo hoa:</b> Các nghệ nhân sử dụng muối của các kim loại để tạo màu sắc rực rỡ. Ví dụ: Strontium (Sr) cho màu đỏ thẫm, Barium (Ba) cho màu xanh lá cây rực rỡ, Copper (Cu) cho màu xanh lam, và Sodium (Na) cho màu vàng cam.</li>
+      <li><b>Phân tích Hóa học (Flame Test):</b> Thử nghiệm ngọn lửa là phương pháp cổ điển để nhận diện nhanh các ion kim loại kiềm và kiềm thổ trong phòng thí nghiệm dựa trên màu sắc đặc trưng của chúng khi bị đốt cháy.</li>
+    </ul>
+  </div>
+
+  <div class="footnote">
+    Developed by USAC 
+  </div>
+
+</div>
+
+<script>
+const SRCS = {
+  O:  { name:"O - Oxygen",      desc:"Khí quyển tầng cao",          dot:"#52d09a", skyColor:[[85,210,38],[230,50,50]],  skyAl:[0.72,0.3],  skyBands:[[0.93,0.2],[0.36,0.03]] },
+  N2: { name:"N₂ - Nitrogen",   desc:"Tầng thấp 90–120 km",         dot:"#8888ee", skyColor:[[90,75,190]],               skyAl:[0.48],       skyBands:[[0.9,0.45]] },
+  H:  { name:"H - Hydrogen",    desc:"Gió Mặt Trời proton",         dot:"#55ccee", skyColor:[[45,155,210]],              skyAl:[0.18],       skyBands:[[0.85,0.52]] },
+  Cu: { name:"Cu - Copper",     desc:"Copper(II) chloride flame",   dot:"#44aaff", skyColor:[[30,140,220]],              skyAl:[0.0],        skyBands:[] },
+  Fe: { name:"Fe - Iron",       desc:"Iron(III) chloride flame",    dot:"#ffaa44", skyColor:[[220,130,30]],              skyAl:[0.0],        skyBands:[] },
+  Na: { name:"Na - Sodium",     desc:"Sodium chloride flame",       dot:"#ff9944", skyColor:[[220,140,20]],              skyAl:[0.0],        skyBands:[] },
+  Li: { name:"Li - Lithium",    desc:"Lithium chloride flame",      dot:"#ff3366", skyColor:[[255,50,100]],              skyAl:[0.0],        skyBands:[] },
+  K:  { name:"K - Potassium",   desc:"Potassium chloride flame",    dot:"#cc66ff", skyColor:[[200,100,255]],             skyAl:[0.0],        skyBands:[] },
+  Ca: { name:"Ca - Calcium",    desc:"Calcium chloride flame",      dot:"#ff6600", skyColor:[[255,100,0]],               skyAl:[0.0],        skyBands:[] },
+  Sr: { name:"Sr - Strontium",  desc:"Strontium chloride flame",    dot:"#cc0033", skyColor:[[200,0,50]],                skyAl:[0.0],        skyBands:[] },
+  Ba: { name:"Ba - Barium",     desc:"Barium chloride flame",       dot:"#99ff33", skyColor:[[150,255,50]],              skyAl:[0.0],        skyBands:[] },
+};
+
+const LINES = [
+  // ── OXYGEN ──
+  { nm:557.7, ion:"O (¹S→¹D)", src:"O", lbl:"Oxygen", bright:1.00, alt:"100–150 km", altcol:"#52d09a", desc:"Vạch XANH LÁ huyền thoại - sáng nhất, màu đặc trưng cực quang. Gọi là 'vạch cấm' vì vi phạm quy tắc chọn lọc thông thường.", cat:"aurora", energy:"2.22 eV", lifetime:"~0.74 s" },
+  { nm:630.0, ion:"O (¹D→³P)", src:"O", lbl:"Oxygen", bright:0.62, alt:"> 200 km", altcol:"#ff7777", desc:"Vạch đỏ oxygen tầng cao - chỉ thấy khi bão từ cực mạnh (CME).", cat:"aurora", energy:"1.97 eV", lifetime:"~110 s" },
+  // ── NITROGEN ──
+  { nm:391.4, ion:"N₂⁺ (B→X)", src:"N2", lbl:"Nitrogen ion", bright:0.65, alt:"90–100 km", altcol:"#b89ee0", desc:"Dải âm đầu tiên N₂⁺ - tím đặc trưng rìa dưới cực quang.", cat:"aurora", energy:"3.17 eV", lifetime:"~60 ns" },
+  { nm:427.8, ion:"N₂⁺ (B→X)", src:"N2", lbl:"Nitrogen ion", bright:0.50, alt:"90–110 km", altcol:"#8aaae0", desc:"Tím-lam của ion N₂⁺ - vùng thấp dưới 110 km, thấy rõ khi cực quang mạnh.", cat:"aurora", energy:"2.90 eV", lifetime:"~60 ns" },
+  // ── HYDROGEN ──
+  { nm:486.1, ion:"H (Hβ 4→2)", src:"H", lbl:"Hydrogen β", bright:0.28, alt:"100–200 km", altcol:"#80d8f5", desc:"Vạch Balmer Hβ - xuất hiện khi proton gió Mặt Trời mạnh.", cat:"aurora", energy:"2.55 eV", lifetime:"~1 ns" },
+  { nm:656.3, ion:"H (Hα 3→2)", src:"H", lbl:"Hydrogen α", bright:0.22, alt:"100–200 km", altcol:"#ee5555", desc:"Vạch đỏ Hα nổi tiếng nhất trong thiên văn học.", cat:"aurora", energy:"1.89 eV", lifetime:"~2 ns" },
+  // ── COPPER ──
+  { nm:324.8, ion:"Cu (²S→²P)", src:"Cu", lbl:"Copper", bright:0.5, alt:"flame", altcol:"#66bbff", desc:"Vạch UV gần mạnh nhất. Có thể thấy mờ qua thủy tinh.", cat:"flame", energy:"3.82 eV", lifetime:"~7 ns" },
+  { nm:510.6, ion:"Cu (²D→²P)", src:"Cu", lbl:"Copper", bright:0.82, alt:"flame", altcol:"#44aaff", desc:"Vạch xanh ngọc đặc trưng của đồng - dùng nhiều trong pháo hoa xanh.", cat:"flame", energy:"2.43 eV", lifetime:"~5 ns" },
+  // ── IRON ──
+  { nm:372.0, ion:"Fe", src:"Fe", lbl:"Iron", bright:0.55, alt:"flame", altcol:"#ffcc66", desc:"Vạch UV gần của Fe. Sắt có hàng ngàn vạch trong quang phổ.", cat:"flame", energy:"3.34 eV", lifetime:"~20 ns" },
+  { nm:404.6, ion:"Fe", src:"Fe", lbl:"Iron", bright:0.72, alt:"flame", altcol:"#ffdd88", desc:"Vạch tím-xanh phổ biến dùng trong phân tích ICP-OES.", cat:"flame", energy:"3.07 eV", lifetime:"~20 ns" },
+  // ── SODIUM ──
+  { nm:589.0, ion:"Na (3p→3s)", src:"Na", lbl:"Sodium", bright:1.00, alt:"flame", altcol:"#ffbb55", desc:"Vạch D nổi tiếng - vàng cam rực. Dễ dàng lấn át các vạch màu khác.", cat:"flame", energy:"2.11 eV", lifetime:"~16 ns" },
+  // ── LITHIUM ──
+  { nm:670.8, ion:"Li (2p→2s)", src:"Li", lbl:"Lithium", bright:0.95, alt:"flame", altcol:"#ff3366", desc:"Vạch đỏ tía (Carmine Red) rực rỡ đặc trưng. Giúp phân biệt Li với màu đỏ cam của Canxi hay đỏ thẫm của Strontium.", cat:"flame", energy:"1.85 eV", lifetime:"~27 ns" },
+  // ── POTASSIUM ──
+  { nm:404.4, ion:"K (5p→4s)", src:"K", lbl:"Potassium", bright:0.7, alt:"flame", altcol:"#cc66ff", desc:"Vạch tím nhạt của Kali. Thường phải dùng kính lọc màu xanh cobalt để cản nhiễu vàng từ Natri mới thấy rõ.", cat:"flame", energy:"3.07 eV", lifetime:"~30 ns" },
+  { nm:766.5, ion:"K (4p→4s)", src:"K", lbl:"Potassium", bright:0.9, alt:"flame", altcol:"#dd66ff", desc:"Vạch đỏ sậm / hồng ngoại gần. Dù nằm ở rìa giới hạn nhìn thấy, máy quang phổ vẫn đo được cường độ rất mạnh.", cat:"flame", energy:"1.62 eV", lifetime:"~26 ns" },
+  // ── CALCIUM ──
+  { nm:422.7, ion:"Ca (4p→4s)", src:"Ca", lbl:"Calcium", bright:0.75, alt:"flame", altcol:"#ff8844", desc:"Vạch xanh tím của Canxi, tuy yếu nhưng đóng góp vào phổ tổng thể.", cat:"flame", energy:"2.93 eV", lifetime:"~4 ns" },
+  { nm:616.2, ion:"Ca (Band)", src:"Ca", lbl:"Calcium", bright:0.85, alt:"flame", altcol:"#ff4400", desc:"Dải vạch đỏ cam đặc trưng nhất giúp nhận diện Canxi bằng mắt thường trong thử nghiệm ngọn lửa.", cat:"flame", energy:"2.01 eV", lifetime:"~10 ns" },
+  // ── BARIUM ──
+  { nm:455.4, ion:"Ba⁺", src:"Ba", lbl:"Barium", bright:0.8, alt:"flame", altcol:"#99ff33", desc:"Vạch xanh lam của ion Barium.", cat:"flame", energy:"2.72 eV", lifetime:"~6 ns" },
+  { nm:524.2, ion:"Ba", src:"Ba", lbl:"Barium", bright:0.95, alt:"flame", altcol:"#77ff33", desc:"Vạch xanh lục (Apple Green) rực rỡ. Barium là thành phần chủ lực để chế tạo pháo hoa màu xanh lá.", cat:"flame", energy:"2.36 eV", lifetime:"~8 ns" },
+  // ── STRONTIUM ──
+  { nm:460.7, ion:"Sr", src:"Sr", lbl:"Strontium", bright:0.85, alt:"flame", altcol:"#cc0033", desc:"Vạch xanh lam mạnh của Strontium. Dù màu ngọn lửa tổng thể là đỏ, phổ vẫn chứa vạch lam.", cat:"flame", energy:"2.69 eV", lifetime:"~5 ns" },
+  { nm:604.5, ion:"Sr (Band)", src:"Sr", lbl:"Strontium", bright:1.00, alt:"flame", altcol:"#dd0033", desc:"Dải vạch đỏ thẫm (Crimson) rực rỡ tuyệt đẹp. Nguyên liệu số 1 cho pháo hoa màu đỏ trên toàn thế giới.", cat:"flame", energy:"2.05 eV", lifetime:"~6 ns" }
+];
+
+const act = { O:true, N2:true, H:true, Cu:true, Fe:true, Na:true, Li:true, K:true, Ca:true, Sr:true, Ba:true };
+const filterCat = { all:true, aurora:false, flame:false };
+let activeFilter = "all";
+let mouseX = 0.5, animT = 0, hvNm = null;
+const SPAN = 400; // 780 - 380
+
+// ── Tính Toán Logic ───────────────────────────────────────
+function updateCalc(nm) {
+  const inp = document.getElementById('calc-lam');
+  if (nm !== undefined) inp.value = nm.toFixed(1);
+  const lam = parseFloat(inp.value);
+  if (!lam || lam <= 0) {
+    document.getElementById('calc-f').innerText = "0";
+    document.getElementById('calc-e').innerText = "0";
+    return;
+  }
+  // c = 2.99792458 x 10^8 m/s
+  // f = c / (lam * 10^-9)
+  const f = 299792458 / (lam * 1e-9);
+  // hc in eV*nm = 1239.84193
+  const e = 1239.84193 / lam;
+  
+  // Format f thành dạng số mũ ví dụ: 5.37 × 10¹⁴
+  let fStr = f.toExponential(2);
+  fStr = fStr.replace('e+', ' × 10^');
+  
+  document.getElementById('calc-f').innerText = fStr;
+  document.getElementById('calc-e').innerText = e.toFixed(3);
+}
+
+// ── nmToRgb ──────────────────────────────────────────────
+function nmRgb(nm) {
+  let r=0,g=0,b=0,a=1;
+  if(nm>=380&&nm<440){r=(440-nm)/60;b=1;}
+  else if(nm>=440&&nm<490){g=(nm-440)/50;b=1;}
+  else if(nm>=490&&nm<510){g=1;b=(510-nm)/20;}
+  else if(nm>=510&&nm<580){r=(nm-510)/70;g=1;}
+  else if(nm>=580&&nm<645){r=1;g=(645-nm)/65;}
+  else if(nm>=645&&nm<=780){r=1;}
+  if(nm<420)a=0.3+(nm-380)/40*0.7;
+  if(nm>680)a=Math.max(0.15, 1-(nm-680)/100); 
+  return [r,g,b,a];
+}
+function nmHex(nm) {
+  const [r,g,b] = nmRgb(nm);
+  return '#'+[r,g,b].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join('');
+}
+
+// ── Sky animation ─────────────────────────────────────────
+function drawSky(t) {
+  const cv = document.getElementById('sky');
+  const W = cv.offsetWidth||700; cv.width=W; cv.height=280;
+  const c = cv.getContext('2d');
+  c.fillStyle='#020710'; c.fillRect(0,0,W,280);
+  // Stars
+  for(let i=0;i<90;i++){
+    const sx=(Math.sin(i*127.3)*0.5+0.5)*W;
+    const sy=(Math.sin(i*51.7)*0.5+0.5)*240;
+    const br=Math.sin(i*23.1+t*0.35)*0.5+0.5;
+    c.fillStyle=`rgba(255,255,255,${(br*0.6+0.06).toFixed(2)})`;
+    c.fillRect(sx,sy,br*1.3+0.3,br*1.3+0.3);
+  }
+  const cx = mouseX * W;
+  Object.entries(SRCS).forEach(([key,s]) => {
+    if(!act[key]) return;
+    s.skyBands.forEach((band, bi) => {
+      const [yBf, yTf] = band;
+      const [rc1,gc1,bc1] = s.skyColor[bi] || s.skyColor[0];
+      const al = s.skyAl[bi] ?? 0;
+      if(al <= 0) return;
+      const yB=yBf*280, yT=yTf*280;
+      for(let col=0;col<15;col++){
+        const f=col/15;
+        const off=Math.sin(f*Math.PI*3+t*(0.8+bi*0.3)+mouseX*2)*15+Math.sin(f*Math.PI*5+t*1.4)*6;
+        const xp=cx-W*0.5+f*W+off;
+        const tk=(Math.sin(f*Math.PI*4+t*0.8)*0.5+0.5)*20+7;
+        const alpha=al*(0.5+Math.sin(f*Math.PI+t*0.5)*0.5)*(1-Math.abs(f-0.5)*0.95);
+        const gr=c.createLinearGradient(xp,yB,xp,yT);
+        gr.addColorStop(0,`rgba(${rc1},${gc1},${bc1},0)`);
+        gr.addColorStop(0.2,`rgba(${rc1},${gc1},${bc1},${alpha.toFixed(2)})`);
+        gr.addColorStop(0.65,`rgba(${rc1},${gc1},${bc1},${(alpha*1.2).toFixed(2)})`);
+        gr.addColorStop(1,`rgba(${rc1},${gc1},${bc1},0)`);
+        c.fillStyle=gr; c.fillRect(xp-tk/2,yT,tk,yB-yT);
+      }
+    });
+  });
+  // Ground
+  c.fillStyle='#0c0620'; c.fillRect(0,250,W,30);
+  for(let m=0;m<35;m++){
+    const mx2=(m*91.3%1)*W;
+    const mh=(m*37.7%1)*12+3;
+    c.fillStyle='#060414';
+    c.beginPath();c.moveTo(mx2-25,280);c.lineTo(mx2,280-mh);c.lineTo(mx2+25,280);c.fill();
+  }
+}
+
+// ── Spectrum ─────────────────────────────────────────────
+function drawSpec() {
+  const cv = document.getElementById('spec');
+  const W = cv.offsetWidth||700; cv.width=W; cv.height=140;
+  const c = cv.getContext('2d');
+  c.fillStyle='#060609'; c.fillRect(0,0,W,140);
+  // faint visible spectrum bg
+  for(let x=0;x<W;x++){
+    const nm=380+(x/W)*SPAN;
+    const [r,g,b,a]=nmRgb(nm);
+    c.fillStyle=`rgb(${Math.round(r*18)},${Math.round(g*18)},${Math.round(b*18)})`;
+    c.fillRect(x,0,1,140);
+  }
+  // emission lines
+  const visLines = LINES.filter(l => {
+    if(!act[l.src]) return false;
+    if(activeFilter!=='all' && l.cat!==activeFilter) return false;
+    return l.nm>=380 && l.nm<=780;
+  });
+  visLines.forEach(ln => {
+    const x=(ln.nm-380)/SPAN*W;
+    const [r,g,b,a]=nmRgb(ln.nm);
+    const rc=Math.round(r*255),gc=Math.round(g*255),bc=Math.round(b*255);
+    const intensity = ln.bright * a;
+    
+    const gr=c.createLinearGradient(x-6,0,x+6,0);
+    gr.addColorStop(0,'transparent');
+    gr.addColorStop(0.5,`rgba(${rc},${gc},${bc},${intensity})`);
+    gr.addColorStop(1,'transparent');
+    c.fillStyle=gr; c.fillRect(x-12,0,24,140);
+    c.fillStyle=`rgba(255,255,255,${(intensity*0.9).toFixed(2)})`;
+    c.fillRect(x-0.5,0,1,140);
+    const isHov = hvNm && Math.abs(ln.nm-hvNm)<5;
+    if(isHov){c.fillStyle='rgba(255,255,255,.12)';c.fillRect(x-16,0,32,140);}
+    c.fillStyle=`rgba(255,255,255,${(0.4+intensity*0.4).toFixed(2)})`;
+    c.font='11px system-ui'; c.textAlign='center';
+    c.fillText(Math.round(ln.nm),x,13);
+  });
+  if(hvNm){
+    const x=(hvNm-380)/SPAN*W;
+    c.strokeStyle='rgba(255,255,255,.25)';c.setLineDash([4,4]);
+    c.beginPath();c.moveTo(x,0);c.lineTo(x,140);c.stroke();c.setLineDash([]);
+  }
+}
+
+// ── Tooltip ───────────────────────────────────────────────
+function updateTooltip(nm) {
+  const tt = document.getElementById('tooltip');
+  if(!nm){tt.innerHTML='<span style="color:var(--muted);font-size:.9rem">Hover lên quang phổ để xem chi tiết vạch phát xạ.</span>';return;}
+  const closest = LINES.filter(l=>act[l.src]&&(activeFilter==='all'||l.cat===activeFilter)&&l.nm>=380&&l.nm<=780)
+    .sort((a,b)=>Math.abs(a.nm-nm)-Math.abs(b.nm-nm))[0];
+  if(!closest||Math.abs(closest.nm-nm)>8){tt.innerHTML='<span style="color:var(--muted);font-size:.9rem">-</span>';return;}
+  const col = nmHex(closest.nm);
+  const srcDot = SRCS[closest.src]?.dot||'#888';
+  tt.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span class="tt-nm" style="color:${col}">${closest.nm} nm</span>
+      <span style="width:12px;height:12px;border-radius:50%;background:${srcDot};display:inline-block;flex-shrink:0"></span>
+      <span style="font-size:0.9rem;font-weight:700;color:${srcDot}">${closest.ion}</span>
+    </div>
+    <div class="tt-row">
+      <span class="tt-badge">${closest.src} - ${closest.lbl}</span>
+      <span class="tt-badge">${closest.alt}</span>
+      <span class="tt-badge">${closest.energy}</span>
+      <span class="tt-badge" style="background:${closest.cat==='aurora'?'#0a2a1a':'#1a1a2a'};color:${closest.cat==='aurora'?'#52d09a':'#8888cc'}">${closest.cat==='aurora'?'Aurora':'Flame'}</span>
+    </div>
+    <div class="tt-desc">${closest.desc}</div>
+  `;
+}
+
+// ── Source list ───────────────────────────────────────────
+function buildSrcList() {
+  const d = document.getElementById('src-list'); d.innerHTML='';
+  Object.entries(SRCS).forEach(([k,s]) => {
+    const cnt = LINES.filter(l=>l.src===k).length;
+    const row = document.createElement('div');
+    row.className='src-row'+(act[k]?'':' off');
+    row.innerHTML=`<span class="src-dot" style="background:${s.dot}"></span><span class="src-name">${s.name}</span><span class="src-desc">${s.desc}</span><span class="src-count">${cnt}</span>`;
+    row.onclick=()=>{act[k]=!act[k];buildSrcList();drawSpec();buildCards();buildStats();};
+    d.appendChild(row);
+  });
+}
+
+// ── Stats ─────────────────────────────────────────────────
+function buildStats() {
+  const vis = LINES.filter(l=>act[l.src]&&l.nm>=380&&l.nm<=780);
+  const aurora = vis.filter(l=>l.cat==='aurora').length;
+  const flame = vis.filter(l=>l.cat==='flame').length;
+  const avgE = vis.length ? (vis.reduce((s,l)=>s+parseFloat(l.energy),0)/vis.length).toFixed(2) : 0;
+  document.getElementById('stat-grid').innerHTML=`
+    <div class="stat"><div class="stat-val">${vis.length}</div><div class="stat-key">Vạch hiển thị</div></div>
+    <div class="stat"><div class="stat-val">${aurora}</div><div class="stat-key">Vạch Aurora</div></div>
+    <div class="stat"><div class="stat-val">${flame}</div><div class="stat-key">Vạch Flame</div></div>
+    <div class="stat"><div class="stat-val">${avgE} eV</div><div class="stat-key">Năng lượng TB</div></div>
+  `;
+}
+
+// ── Filter tabs ───────────────────────────────────────────
+function buildFilterTabs() {
+  const d = document.getElementById('filter-tabs'); d.innerHTML='';
+  [['all','Tất cả'],['aurora','Aurora'],['flame','Flame Test']].forEach(([v,lbl])=>{
+    const btn=document.createElement('button');
+    btn.className='ftab'+(activeFilter===v?' active':'');
+    btn.textContent=lbl;
+    btn.onclick=()=>{activeFilter=v;buildFilterTabs();drawSpec();buildCards();};
+    d.appendChild(btn);
+  });
+}
+
+// ── Cards ─────────────────────────────────────────────────
+function buildCards() {
+  const d = document.getElementById('cards-grid'); d.innerHTML='';
+  const visible = LINES.filter(l=>{
+    if(!act[l.src]) return false;
+    if(activeFilter!=='all' && l.cat!==activeFilter) return false;
+    return true;
+  }).sort((a,b)=>a.nm-b.nm);
+  if(!visible.length){
+    d.innerHTML='<div style="color:var(--muted);font-size:1rem;padding:1rem">Không có vạch nào - bật thêm nguồn phát xạ.</div>';
+    return;
+  }
+  visible.forEach(ln=>{
+    const col = nmHex(ln.nm);
+    const srcDot = SRCS[ln.src]?.dot||'#888';
+    const card=document.createElement('div');
+    card.className='lcard';
+    card.style.borderLeftColor=col;
+    // Click vào thẻ để tính năng lượng và cuộn xuống
+    card.onclick = () => {
+      updateCalc(ln.nm);
+      document.getElementById('physics-section').scrollIntoView({behavior: 'smooth', block: 'center'});
+      // Highlight tạm thời ô nhập
+      const calcBox = document.querySelector('.calc-box');
+      calcBox.style.transform = 'scale(1.02)';
+      calcBox.style.boxShadow = '0 0 20px rgba(82, 208, 154, 0.4)';
+      setTimeout(() => {
+        calcBox.style.transform = 'none';
+        calcBox.style.boxShadow = '0 4px 15px rgba(82, 208, 154, 0.1)';
+      }, 400);
+    };
+    
+    card.innerHTML=`
+      <div class="lcard-top">
+        <div class="lcard-nm" style="color:${col}">${ln.nm} nm</div>
+        <span class="lcard-src" style="color:${srcDot}">${ln.src}</span>
+      </div>
+      <div class="lcard-ion">${ln.ion}</div>
+      <div class="lcard-desc">${ln.desc}</div>
+      <div class="lcard-foot">
+        <span class="lc-badge" style="background:${col}18;color:${col}">${ln.energy}</span>
+        <span class="lc-badge" style="background:var(--bg3);color:var(--muted)">${ln.alt}</span>
+        <span class="lc-badge" style="background:${ln.cat==='aurora'?'#0a2a1a':'#1a1830'};color:${ln.cat==='aurora'?'#52d09a':'#8888cc'}">${ln.cat==='aurora'?'Aurora':'Flame'}</span>
+      </div>
+    `;
+    d.appendChild(card);
+  });
+}
+
+// ── Events ────────────────────────────────────────────────
+document.getElementById('sky').addEventListener('mousemove',e=>{
+  mouseX=(e.clientX-e.target.getBoundingClientRect().left)/e.target.offsetWidth;
+});
+document.getElementById('sky').addEventListener('mouseleave',()=>{mouseX=0.5;});
+const sc=document.getElementById('spec');
+sc.addEventListener('mousemove',e=>{
+  hvNm=380+(e.clientX-sc.getBoundingClientRect().left)/sc.offsetWidth*SPAN;
+  drawSpec();updateTooltip(hvNm);
+});
+sc.addEventListener('mouseleave',()=>{hvNm=null;drawSpec();updateTooltip(null);});
+window.addEventListener('resize',()=>{drawSpec();});
+
+// ── Init ──────────────────────────────────────────────────
+buildSrcList();buildStats();buildFilterTabs();buildCards();drawSpec();updateCalc();
+(function loop(ts){animT=ts/1000;drawSky(animT);requestAnimationFrame(loop);})(0);
+</script>
+</body>
+</html>
