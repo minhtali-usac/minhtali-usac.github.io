@@ -502,7 +502,7 @@
     const sp = this.sp, tr = this.last, T = AL.term;
     let p1;
     if (!tr) {
-      p1 = `${T('Electron', 'electron')} chỉ tồn tại ở những ${T('mức năng lượng', 'level')} xác định. Khi hấp thụ năng lượng (nhiệt, va chạm), electron chuyển lên ${T('trạng thái kích thích', 'excited')}. Trạng thái này kém bền: electron chuyển về mức thấp hơn và phát ra một ${T('photon', 'photon')} mang đúng năng lượng ΔE.`;
+      p1 = `${T('Electron', 'electron')} chỉ tồn tại ở những ${T('mức năng lượng', 'level')} xác định. Khi nhận năng lượng (từ nhiệt hoặc va chạm), electron “nhảy” lên ${T('trạng thái kích thích', 'excited')}. Nó không ở đó lâu: electron rơi về mức thấp hơn và phát ra một ${T('photon', 'photon')} mang đúng phần năng lượng chênh lệch ΔE.`;
     } else {
       const reg = AL.region(tr.nm), u = this.lv[tr.ui].t, l = this.lv[tr.li].t;
       p1 = `Electron chuyển từ mức <b>${u}</b> về <b>${l}</b>, giải phóng <b>${fmt(tr.dE, 2)} eV</b> dưới dạng photon <b style="color:${reg === 'VIS' ? AL.nmCSS(tr.nm) : '#c9b8ff'}">${AL.fmtNm(tr.nm)}</b>` +
@@ -510,7 +510,7 @@
         (tr.d ? ` ${AL.esc(tr.d)}` : '');
     }
     const full = AL.store.state.mode === 'full';
-    return `<p>${p1}</p>${full ? `<p class="muted">${AL.esc(sp.note)}</p>` : ''}<div class="formula">ΔE = hc / λ <span>≈ 1240 / λ(nm) eV</span></div>`;
+    return `<p>${p1}</p>${full ? `<p class="muted">${AL.esc(sp.note)}</p>` : ''}<div class="formula">$\\Delta E = \\dfrac{hc}{\\lambda}$ <span>$\\approx \\dfrac{1240}{\\lambda\\,(\\mathrm{nm})}\\ \\mathrm{eV}$</span></div><p class="src">Nguồn: NIST Atomic Spectra Database; OpenStax University Physics, tập 3, chương 6</p>`;
   };
   S.updateExplain = function () { if (this.explainEl) this.explainEl.innerHTML = this.explainHTML(); };
 

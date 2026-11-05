@@ -151,6 +151,8 @@ function mount() {
     if (mood) {
       moodT += dt;
       if (mood === 'win') { const k = Math.min(1, moodT / 1.1); m.root.position.y += Math.sin(k * Math.PI) * 0.45; m.root.rotation.y = k * Math.PI * 2; if (k >= 1) { mood = null; m.root.rotation.y = 0; } }
+      else if (mood === 'think') { const k = Math.min(1, moodT / 0.4) * Math.max(0, Math.min(1, (2.4 - moodT) / 0.4)); m.head.rotation.z = 0.28 * k; m.antennae.forEach((a, i) => (a.rotation.z += (i ? 0.25 : -0.25) * k)); if (moodT > 2.4) { mood = null; m.head.rotation.z = 0; } }
+      else if (mood === 'sad') { const k = Math.min(1, moodT / 0.5) * Math.max(0, Math.min(1, (2.6 - moodT) / 0.5)); m.head.rotation.x += 0.32 * k; m.root.position.y -= 0.12 * k; m.antennae.forEach((a) => (a.rotation.x += 0.5 * k)); if (moodT > 2.6) mood = null; }
       else { m.head.rotation.x += Math.sin(moodT * 12) * 0.08 * Math.max(0, 1 - moodT / 1.2); if (moodT > 1.2) mood = null; }
     }
     renderer.render(scene, cam);

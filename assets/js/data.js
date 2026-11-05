@@ -33,7 +33,7 @@
     H: {
       sym: 'H', name: 'Hydrogen', vi: 'hiđro', color: '#ff6f91', Z: 1, core: [], ion: 13.606,
       axis: [[0, 0.7, 0.12], [9.75, 13.75, 0.88]],
-      note: 'Hydrogen (Z = 1) là hệ một electron, năng lượng các mức tuân theo hệ thức Eₙ = −13,6/n² eV. Các chuyển mức về n = 2 tạo dãy Balmer nằm trong vùng khả kiến.',
+      note: 'Hydrogen (Z = 1) là hệ một electron, năng lượng các mức tuân theo hệ thức $E_n = -\\dfrac{13{,}6}{n^2}\\ \\mathrm{eV}$. Các chuyển mức về n = 2 tạo dãy Balmer nằm trong vùng khả kiến.',
       levels: [
         { id: 'n1', t: 'n = 1', tl: 'n = 1 (cơ bản)', E: 0 },
         { id: 'n2', t: 'n = 2', E: 10.204, x: 0.1 },
@@ -248,22 +248,22 @@
   ];
 
   const terms = {
-    photon: 'Hạt ánh sáng: một “gói” năng lượng E = hc/λ. Bước sóng λ quyết định màu.',
+    photon: 'Hạt ánh sáng: một “gói” năng lượng $E = \\dfrac{hc}{\\lambda}$. Bước sóng λ quyết định màu.',
     electron: 'Hạt mang điện âm ở lớp vỏ nguyên tử; chỉ được ở những mức năng lượng nhất định.',
     level: 'Các giá trị năng lượng được phép của electron trong nguyên tử; năng lượng bị lượng tử hóa nên electron không thể có giá trị nằm giữa hai mức.',
     ground: 'Mức năng lượng thấp nhất, trạng thái bền của nguyên tử.',
     excited: 'Electron ở mức cao hơn mức cơ bản sau khi nhận năng lượng; trạng thái này không bền.',
-    eV: 'Electronvolt, đơn vị năng lượng rất nhỏ: 1 eV = 1,602 × 10⁻¹⁹ J.',
+    eV: 'Electronvolt, đơn vị năng lượng rất nhỏ: $1\\ \\mathrm{eV} = 1{,}602 \\times 10^{-19}\\ \\mathrm{J}$.',
     keV: 'Kilo-electronvolt = 1000 eV, cỡ năng lượng của electron lao vào khí quyển tạo cực quang.',
     wavelength: 'Khoảng cách giữa hai đỉnh sóng ánh sáng. Mắt người thấy được khoảng 380–780 nm.',
     meta: 'Trạng thái kích thích có thời gian sống dài (từ mili-giây tới hàng trăm giây) do chuyển mức về trạng thái thấp hơn bị quy tắc chọn lọc hạn chế; vạch phát ra gọi là vạch cấm.',
     uv: 'Tử ngoại (UV): ánh sáng có λ < 380 nm, mắt người không thấy.',
     ir: 'Hồng ngoại (IR): ánh sáng có λ > 780 nm, mắt người không thấy.',
-    solarwind: 'Dòng hạt mang điện (chủ yếu electron và proton) thổi liên tục từ Mặt Trời, tốc độ vài trăm km/s.',
-    magnetosphere: 'Vùng không gian quanh Trái Đất do từ trường Trái Đất chi phối; nó chắn phần lớn gió Mặt Trời.',
+    solarwind: 'Dòng plasma (chủ yếu proton và electron) thổi liên tục từ Mặt Trời, tốc độ thường khoảng 300–800 km/s. Nó không lao thẳng xuống khí quyển mà “nạp” năng lượng cho từ quyển.',
+    magnetosphere: 'Vùng không gian quanh Trái Đất do từ trường Trái Đất chi phối. Nó chắn phần lớn gió Mặt Trời và tích trữ năng lượng; electron gây cực quang chủ yếu xuất phát từ đây.',
     fieldline: 'Đường sức từ: hạt mang điện bị “dẫn” đi dọc theo nó, và các đường sức hội tụ về hai cực.',
-    thermosphere: 'Tầng khí quyển trên khoảng 85 km, rất loãng. Cực quang xuất hiện ở đây.',
-    kp: 'Chỉ số Kp (0–9) đo mức nhiễu loạn của từ trường Trái Đất; Kp càng cao, cực quang càng mạnh và lan xa về phía xích đạo.',
+    thermosphere: 'Tầng khí quyển từ khoảng 85–90 km trở lên, rất loãng. Phần lớn cực quang sáng lên ở độ cao khoảng 90–300 km.',
+    kp: 'Chỉ số Kp (0–9) cho biết từ trường Trái Đất bị xáo động mạnh đến đâu trong mỗi khoảng 3 giờ, tính từ nhiều đài từ kế trên mặt đất. Kp càng cao, vành cực quang càng sáng và lan xa về phía xích đạo.',
     quench: 'Va chạm làm nguyên tử bị kích thích mất năng lượng trước khi kịp phát sáng (dập tắt do va chạm).',
     spectroscope: 'Kính phân quang: dụng cụ dùng lăng kính hoặc cách tử để tách ánh sáng thành các vạch theo bước sóng.',
     band: 'Phân tử (như CaOH, SrOH) có thêm nhiều mức dao động, nên phát ra cả một dải màu rộng thay vì vạch mảnh.',
@@ -275,21 +275,21 @@
     atom: [
       { q: 'Khi electron chuyển từ mức năng lượng cao về mức thấp hơn, nguyên tử sẽ…',
         a: ['hấp thụ một photon', 'phát ra một photon', 'mất đi một proton', 'biến thành nguyên tố khác'], c: 1,
-        why: 'Phần năng lượng chênh lệch ΔE được mang đi bởi một photon có λ = hc/ΔE.' },
+        why: 'Phần năng lượng chênh lệch ΔE được mang đi bởi một photon có $\\lambda = \\dfrac{hc}{\\Delta E}$.' },
       { q: 'Hiệu năng lượng ΔE của chuyển mức càng lớn thì photon phát ra có bước sóng…',
         a: ['ngắn hơn (về phía tím, tử ngoại)', 'dài hơn (về phía đỏ, hồng ngoại)', 'không thay đổi', 'bằng 0'], c: 0,
-        why: 'λ = hc/ΔE: năng lượng và bước sóng tỉ lệ nghịch.' },
+        why: '$\\lambda = \\dfrac{hc}{\\Delta E}$: năng lượng và bước sóng tỉ lệ nghịch.' },
       { q: 'Vạch vàng 589 nm của sodium ứng với ΔE khoảng bao nhiêu?',
         a: ['1,0 eV', '2,1 eV', '3,5 eV', '13,6 eV'], c: 1,
-        why: 'ΔE ≈ 1240 / 589 ≈ 2,1 eV, đúng bằng khoảng cách giữa mức 3p và 3s.' },
+        why: '$\\Delta E \\approx \\dfrac{1240}{589} \\approx 2{,}1\\ \\mathrm{eV}$, đúng bằng khoảng cách giữa mức 3p và 3s.' },
     ],
     aurora: [
       { q: 'Màu xanh lục phổ biến nhất của cực quang do chất nào phát ra?',
         a: ['Oxygen nguyên tử (557,7 nm)', 'Nitrogen phân tử', 'Hydrogen', 'Sodium'], c: 0,
         why: 'Nguyên tử O chuyển từ trạng thái ¹S về ¹D và phát vạch 557,7 nm, chủ yếu ở độ cao 100–150 km.' },
-      { q: 'Khi các hạt từ gió Mặt Trời có năng lượng cao hơn, dải cực quang…',
+      { q: 'Khi các electron lao vào khí quyển có năng lượng cao hơn, dải cực quang…',
         a: ['xuống thấp hơn', 'lên cao hơn', 'giữ nguyên độ cao', 'biến mất'], c: 0,
-        why: 'Hạt càng nhiều năng lượng càng xuyên sâu vào khí quyển dày đặc trước khi dừng lại.' },
+        why: 'Electron càng nhiều năng lượng càng đi sâu vào lớp khí dày đặc hơn trước khi dừng lại, nên vùng phát sáng nằm thấp hơn.' },
       { q: 'Vì sao vạch đỏ 630 nm chỉ xuất hiện ở trên cao (> 200 km)?',
         a: ['Vì trên cao nhiệt độ cao hơn', 'Vì trạng thái ¹D phải chờ ~110 s; ở thấp nó bị va chạm làm mất năng lượng trước khi kịp phát sáng', 'Vì Mặt Trời có màu đỏ', 'Vì ở dưới thấp không có oxygen'], c: 1,
         why: 'Ở thấp, không khí dày nên nguyên tử bị va chạm liên tục: vạch đỏ bị “dập tắt”. Chỉ ở trên cao, nơi rất loãng, nó mới kịp phát sáng.' },
@@ -303,7 +303,7 @@
         why: 'Lithium có một vạch đỏ 670,8 nm gần như đứng một mình; strontium có dải đỏ rộng 640–690 nm kèm vạch lam 460,7 nm.' },
       { q: 'Vì sao mỗi nguyên tố có “dấu vân tay ánh sáng” riêng?',
         a: ['Vì ngọn lửa có nhiều màu', 'Vì mỗi nguyên tố có một bộ mức năng lượng riêng', 'Vì kính phân quang tự tô màu', 'Vì các muối có vị khác nhau'], c: 1,
-        why: 'Các khoảng cách ΔE giữa những mức năng lượng là riêng cho từng nguyên tố, nên bộ bước sóng λ = hc/ΔE cũng riêng.' },
+        why: 'Các khoảng cách ΔE giữa những mức năng lượng là riêng cho từng nguyên tố, nên bộ bước sóng $\\lambda = \\dfrac{hc}{\\Delta E}$ cũng riêng.' },
     ],
   };
 
@@ -326,6 +326,35 @@
       'Thử phân tích “Mẫu chưa biết” để rèn kỹ năng nhận diện quang phổ.',
     ],
   };
+
+  // ---------- Tài liệu tham khảo (dùng chung cho USACodex, thẻ giải thích và mục Tài liệu) ----------
+  // kind: 'data' cơ sở dữ liệu · 'book' sách, giáo trình · 'paper' bài báo khoa học · 'web' trang của cơ quan khoa học
+  const refs = {
+    nist:      { kind: 'data',  au: 'Kramida, A., Ralchenko, Yu., Reader, J., & NIST ASD Team', y: '2024', t: 'NIST Atomic Spectra Database (phiên bản 5.12)', src: 'National Institute of Standards and Technology, Gaithersburg, MD', doi: '10.18434/T4W30F', url: 'https://physics.nist.gov/asd', use: 'Bước sóng vạch, mức năng lượng và thời gian sống của nguyên tử.' },
+    codata:    { kind: 'paper', au: 'Tiesinga, E., Mohr, P. J., Newell, D. B., & Taylor, B. N.', y: '2021', t: 'CODATA recommended values of the fundamental physical constants: 2018', src: 'Reviews of Modern Physics, 93(2), 025010', doi: '10.1103/RevModPhys.93.025010', use: 'Giá trị h, c, 1 eV và hc ≈ 1239,84 eV·nm.' },
+    cie:       { kind: 'book',  au: 'Commission Internationale de l’Éclairage (CIE)', y: '2004', t: 'Colorimetry (CIE 15:2004, tái bản lần 3)', src: 'CIE Central Bureau, Vienna', use: 'Vùng khả kiến 380–780 nm và độ nhạy sáng của mắt.' },
+    upv3:      { kind: 'book',  au: 'Ling, S. J., Sanny, J., & Moebs, W.', y: '2016', t: 'University Physics, Volume 3. Chương 6: Photons and Matter Waves', src: 'OpenStax, Rice University (miễn phí)', url: 'https://openstax.org/books/university-physics-volume-3/pages/6-introduction', use: 'Photon, E = hc/λ, mô hình Bohr và các dãy phổ hydrogen.' },
+    chem2e:    { kind: 'book',  au: 'Flowers, P., Theopold, K., Langley, R., & Robinson, W. R.', y: '2019', t: 'Chemistry 2e. Chương 6: Electronic Structure and Periodic Properties of Elements', src: 'OpenStax, Rice University (miễn phí)', url: 'https://openstax.org/books/chemistry-2e/pages/6-introduction', use: 'Lượng tử hóa năng lượng, quang phổ vạch, màu ngọn lửa.' },
+    astro2e:   { kind: 'book',  au: 'Fraknoi, A., Morrison, D., & Wolff, S. C.', y: '2022', t: 'Astronomy 2e. Chương 5: Radiation and Spectra', src: 'OpenStax, Rice University (miễn phí)', url: 'https://openstax.org/books/astronomy-2e/pages/5-introduction', use: 'Ba loại quang phổ, định luật Kirchhoff, quang phổ học thiên văn.' },
+    griffiths: { kind: 'book',  au: 'Griffiths, D. J.', y: '2017', t: 'Introduction to Electrodynamics (tái bản lần 4). Chương 9: Electromagnetic Waves', src: 'Cambridge University Press', doi: '10.1017/9781108333511', use: 'Sóng điện từ phẳng: E vuông góc B, cùng pha, lan truyền với tốc độ c.' },
+    conkling:  { kind: 'book',  au: 'Conkling, J. A., & Mocella, C. J.', y: '2011', t: 'Chemistry of Pyrotechnics: Basic Principles and Theory (tái bản lần 2)', src: 'CRC Press, Boca Raton', doi: '10.1201/9781420018097' },
+    steinhauser:{ kind: 'paper', au: 'Steinhauser, G., & Klapötke, T. M.', y: '2008', t: '“Green” pyrotechnics: A chemists’ challenge', src: 'Angewandte Chemie International Edition, 47(18), 3330–3347', doi: '10.1002/anie.200704510' },
+    mayor:     { kind: 'paper', au: 'Mayor, M., & Queloz, D.', y: '1995', t: 'A Jupiter-mass companion to a solar-type star', src: 'Nature, 378, 355–359', doi: '10.1038/378355a0' },
+    bohr:      { kind: 'paper', au: 'Bohr, N.', y: '1913', t: 'On the constitution of atoms and molecules', src: 'Philosophical Magazine, 26(151), 1–25', doi: '10.1080/14786441308634955', use: 'Bài báo gốc về mô hình mức năng lượng của nguyên tử hydrogen.' },
+    kirchhoff: { kind: 'paper', au: 'Kirchhoff, G., & Bunsen, R.', y: '1860', t: 'Chemische Analyse durch Spectralbeobachtungen', src: 'Annalen der Physik, 186(6), 161–189', doi: '10.1002/andp.18601860602', use: 'Công trình khai sinh phép phân tích nguyên tố bằng quang phổ ngọn lửa.' },
+    gaydon:    { kind: 'book',  au: 'Gaydon, A. G.', y: '1974', t: 'The Spectroscopy of Flames (tái bản lần 2)', src: 'Chapman and Hall, London', doi: '10.1007/978-94-009-5720-6', use: 'Dải phân tử CaOH, SrOH, BaOH, CuCl, CH và C₂ (dải Swan) trong ngọn lửa.' },
+    lofthus:   { kind: 'paper', au: 'Lofthus, A., & Krupenie, P. H.', y: '1977', t: 'The spectrum of molecular nitrogen', src: 'Journal of Physical and Chemical Reference Data, 6(1), 113–307', doi: '10.1063/1.555546', use: 'Hệ dải âm thứ nhất của N₂⁺ (391,4 và 427,8 nm) và dải dương thứ nhất của N₂.' },
+    slanger:   { kind: 'paper', au: 'Slanger, T. G., & Copeland, R. A.', y: '2003', t: 'Energetic oxygen in the upper atmosphere and the laboratory', src: 'Chemical Reviews, 103(12), 4731–4766', doi: '10.1021/cr0205311', use: 'Trạng thái O(¹D), O(¹S), vạch 557,7 / 630,0 nm và quá trình dập tắt.' },
+    solomon:   { kind: 'paper', au: 'Solomon, S. C., Hays, P. B., & Abreu, V. J.', y: '1988', t: 'The auroral 6300 Å emission: Observations and modeling', src: 'Journal of Geophysical Research: Space Physics, 93(A9), 9867–9882', doi: '10.1029/JA093iA09p09867', use: 'Vì sao vạch đỏ 630 nm chỉ sáng ở trên cao.' },
+    fang:      { kind: 'paper', au: 'Fang, X., Randall, C. E., Lummerzheim, D., Wang, W., Lu, G., Solomon, S. C., & Frahm, R. A.', y: '2010', t: 'Parameterization of monoenergetic electron impact ionization', src: 'Geophysical Research Letters, 37(22), L22106', doi: '10.1029/2010GL045406', use: 'Độ cao electron dừng lại theo năng lượng (cơ sở cho thanh trượt keV).' },
+    rees:      { kind: 'book',  au: 'Rees, M. H.', y: '1989', t: 'Physics and Chemistry of the Upper Atmosphere', src: 'Cambridge University Press', doi: '10.1017/CBO9780511573118', use: 'Cấu trúc nhiệt quyển, va chạm và phát xạ cực quang.' },
+    paschmann: { kind: 'book',  au: 'Paschmann, G., Haaland, S., & Treumann, R. (chủ biên)', y: '2003', t: 'Auroral Plasma Physics', src: 'Springer (Space Sciences Series of ISSI, tập 15)', doi: '10.1007/978-94-007-1086-3', use: 'Nguồn gốc và cơ chế gia tốc electron cực quang trong từ quyển.' },
+    baumjohann:{ kind: 'book',  au: 'Baumjohann, W., & Treumann, R. A.', y: '2012', t: 'Basic Space Plasma Physics (bản hiệu đính)', src: 'Imperial College Press, London', doi: '10.1142/P850', use: 'Lực Lorentz, chuyển động xoắn của hạt quanh đường sức từ.' },
+    swpcAurora:{ kind: 'web',   au: 'NOAA Space Weather Prediction Center', y: 'truy cập 11/2026', t: 'Aurora', src: 'swpc.noaa.gov', url: 'https://www.swpc.noaa.gov/phenomena/aurora', use: 'Kiến thức phổ thông về cực quang và dự báo cực quang.' },
+    swpcKp:    { kind: 'web',   au: 'NOAA Space Weather Prediction Center', y: 'truy cập 11/2026', t: 'Planetary K-index', src: 'swpc.noaa.gov', url: 'https://www.swpc.noaa.gov/products/planetary-k-index', use: 'Định nghĩa và thang đo chỉ số Kp.' },
+  };
+  const REF_ORDER = Object.keys(refs);
+  REF_ORDER.forEach((k, i) => { refs[k].id = k; refs[k].n = i + 1; });
 
   // ---------- Chỉ mục vạch phổ (dựng tự động) ----------
   const index = {};
@@ -355,7 +384,7 @@
   for (const a of aurora) put({ id: a.id, alt: a.alt, aurora: true });
 
   AL.DATA = {
-    species, flame, FLAME_ORDER, extra, aurora, terms, quiz, tips, index,
+    species, flame, FLAME_ORDER, extra, aurora, terms, quiz, tips, index, refs, REF_ORDER,
     line: (id) => index[id],
     sp: (id) => species[id] || extra[id],
     lineId: lid,

@@ -279,10 +279,7 @@
       c.fillRect(p.x - 1, p.y - 1, p.st === 'funnel' ? 2.6 : 2, p.st === 'funnel' ? 2.6 : 2);
     }
     // Trái Đất
-    const eg = c.createRadialGradient(G.ex - G.re * 0.4, G.ey - G.re * 0.4, G.re * 0.1, G.ex, G.ey, G.re);
-    eg.addColorStop(0, '#9fd3ff'); eg.addColorStop(0.55, '#2f6fd1'); eg.addColorStop(1, '#0b2257');
-    c.fillStyle = eg; c.beginPath(); c.arc(G.ex, G.ey, G.re, 0, Math.PI * 2); c.fill();
-    c.fillStyle = 'rgba(0,0,0,.45)'; c.beginPath(); c.arc(G.ex, G.ey, G.re, -Math.PI / 2, Math.PI / 2); c.fill();
+    AL.drawEarth(c, G.ex, G.ey, G.re, performance.now() / 1000);
     // vành cực quang ở hai cực
     const dc = GROUPS[this.dom].rgb;
     c.globalCompositeOperation = 'lighter';
@@ -532,13 +529,13 @@
   AU.explainHTML = function () {
     const T = AL.term, d = this.dom;
     const p = {
-      red: `Hạt năng lượng thấp dừng lại ở trên cao (> 200 km), nơi không khí rất loãng. Nguyên tử O ở ${T('trạng thái giả bền', 'meta')} ¹D có đủ thời gian (~110 s) để phát vạch <b style="color:#ff6b6b">đỏ 630 nm</b> trước khi bị va chạm.`,
-      green: `Hạt dừng ở khoảng 100–150 km. Tại đây O phát vạch <b style="color:#7dff8a">xanh lục 557,7 nm</b>, màu cực quang phổ biến nhất. Vạch đỏ gần như bị ${T('dập tắt', 'quench')} vì ở độ cao này va chạm quá nhiều.`,
-      violet: `Hạt năng lượng rất cao xuyên sâu xuống ~90–100 km, nơi N₂ chiếm ưu thế. Ion N₂⁺ phát vạch <b style="color:#a993ff">tím-lam 391,4 / 427,8 nm</b>; vạch xanh lục của O cũng bị dập tắt ở độ sâu này.`,
+      red: `Electron năng lượng thấp chỉ đi được tới tầng rất cao (trên 200 km), nơi không khí cực loãng. Ở đây nguyên tử O ở ${T('trạng thái giả bền', 'meta')} ¹D có đủ thời gian “chờ” khoảng 110 giây để phát vạch <b style="color:#ff6b6b">đỏ 630 nm</b> mà không bị va chạm cắt ngang.`,
+      green: `Electron dừng lại ở khoảng 100–150 km. Tại đây O phát vạch <b style="color:#7dff8a">xanh lục 557,7 nm</b>, màu cực quang hay gặp nhất. Vạch đỏ thì gần như bị ${T('dập tắt', 'quench')}: không khí ở độ cao này đã đủ dày để va chạm “cướp” năng lượng trước khi nguyên tử kịp phát sáng.`,
+      violet: `Electron năng lượng rất cao đi sâu xuống khoảng 90–100 km, nơi N₂ chiếm ưu thế. Ion N₂⁺ phát ánh sáng <b style="color:#a993ff">tím-lam 391,4 / 427,8 nm</b>, còn N₂ trung hòa phát thêm dải đỏ hồng, tạo nên viền dưới màu hồng tím của những dải cực quang mạnh.`,
     }[d];
     const more = AL.store.state.mode === 'full'
-      ? `<p class="muted">${T('Gió Mặt Trời', 'solarwind')} mang hạt mang điện tới Trái Đất; ${T('từ quyển', 'magnetosphere')} dẫn chúng theo ${T('đường sức từ', 'fieldline')} xuống hai vùng cực, vào ${T('nhiệt quyển', 'thermosphere')}.</p>` : '';
-    return `<p>${p}</p>${more}<div class="formula">năng lượng hạt ↑ <span>→ dải sáng xuống thấp, đổi màu</span></div>`;
+      ? `<p class="muted">${T('Gió Mặt Trời', 'solarwind')} không lao thẳng xuống bầu trời. Nó “nạp” năng lượng cho ${T('từ quyển', 'magnetosphere')}; năng lượng đó gia tốc electron có sẵn trong từ quyển, rồi electron trượt theo ${T('đường sức từ', 'fieldline')} xuống ${T('nhiệt quyển', 'thermosphere')} ở hai vùng cực.</p>` : '';
+    return `<p>${p}</p>${more}<div class="formula">năng lượng electron ↑ <span>→ dải sáng xuống thấp, đổi màu</span></div><p class="src">Nguồn: Slanger &amp; Copeland (2003); Solomon và cs. (1988); Fang và cs. (2010)</p>`;
   };
   AU.updateExplain = function () { if (this.explainEl) this.explainEl.innerHTML = this.explainHTML(); };
 
@@ -546,7 +543,7 @@
     const ui = AL.ui, full = AL.store.state.mode === 'full', T = AL.term;
     const hTxt = () => `Hạt dừng lại, phát sáng mạnh nhất ở ≈ <b>${Math.round(this.hp)} km</b>`;
     const kTxt = () => `Kp ≈ ${this.kp()} · ${this.windName()}`;
-    const eS = ui.slider({ value: this.s, label: 'Năng lượng mỗi hạt', valueText: this.eTxt(), ends: ['thấp · 0,1 keV', '30 keV · cao'],
+    const eS = ui.slider({ value: this.s, label: 'Năng lượng mỗi electron', valueText: this.eTxt(), ends: ['thấp · 0,1 keV', '30 keV · cao'],
       onInput: (v) => { this.setE(v); this.afterChange(eS); } });
     const hNote = full ? ui.note(hTxt()) : null; // Cơ bản: độ cao đỉnh đã hiện trên hình và thanh trạng thái
     this.eSliders = [eS]; this.hNote = hNote && (() => (hNote.innerHTML = hTxt()));
@@ -556,8 +553,8 @@
     this.explainEl = exp.body;
     const chart = full ? this.chartEl() : null;
     return [
-      ui.step(1, 'Năng lượng hạt', null, eS, hNote),
-      ui.step(2, 'Gió Mặt Trời', null, fS, full ? ui.note(`Gió mạnh → nhiều hạt hơn → cực quang sáng hơn, ${T('chỉ số Kp', 'kp')} tăng; từ quyển bị ép sát Trái Đất hơn.`) : null),
+      ui.step(1, 'Năng lượng electron', null, eS, hNote),
+      ui.step(2, 'Hoạt động Mặt Trời', null, fS, full ? ui.note(`Gió Mặt Trời mạnh → từ quyển bị ép sát Trái Đất và nhận nhiều năng lượng hơn → nhiều electron đổ xuống, cực quang sáng hơn, ${T('chỉ số Kp', 'kp')} tăng.`) : null),
       ui.step(3, 'Hiện trên mô phỏng', null,
         ui.seg([['section', 'Mặt cắt khí quyển'], ['ground', 'Từ mặt đất']], this.view, (v) => { this.view = v; this.ground = null; this.status(); }),
         ui.check('Tầng khí quyển', this.opt.layers, (v) => (this.opt.layers = v)),
@@ -565,7 +562,7 @@
         ui.check('Nhãn trên hình', this.opt.labels, (v) => (this.opt.labels = v))),
       exp,
       full ? ui.block('Cường độ phát xạ theo độ cao', chart) : null,
-      full ? ui.block('Bảng vạch cực quang', this.table(), ui.note('Độ cao là giá trị điển hình, phụ thuộc phổ năng lượng của dòng hạt và mật độ khí quyển tầng cao.')) : null,
+      full ? ui.block('Bảng vạch cực quang', this.table(), ui.note('Độ cao là giá trị điển hình, thay đổi theo phổ năng lượng của electron và mật độ khí quyển tầng cao. Nguồn: NIST ASD; Slanger &amp; Copeland (2003); Lofthus &amp; Krupenie (1977).')) : null,
     ];
   };
 

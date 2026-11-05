@@ -42,13 +42,13 @@
     const w = this.W, h = this.H, wide = (this.wide = w >= h * 1.1);
     if (wide) {
       this.bx = w * 0.2; this.mouth = h * 0.74; this.fh = h * 0.46;
-      this.scr = { x0: w * 0.55, x1: w * 0.96, y0: h * 0.14, y1: h * 0.4 };
+      this.scr = { x0: w * 0.5, x1: w * 0.975, y0: h * 0.09, y1: h * 0.56 };
       this.slot = { x: w * 0.43, y: this.mouth - this.fh * 0.42 };
       this.dock = { x: w * 0.43, y: h * 0.86 };
     } else {
       this.bx = w * 0.3; this.mouth = h * 0.86; this.fh = h * 0.34;
       const y0 = Math.max(h * 0.17, 116); // dưới ô "Câu hỏi"
-      this.scr = { x0: w * 0.06, x1: w * 0.94, y0, y1: y0 + h * 0.19 };
+      this.scr = { x0: w * 0.04, x1: w * 0.96, y0, y1: y0 + h * 0.3 };
       this.slot = { x: w * 0.66, y: this.mouth - this.fh * 0.42 };
       this.dock = { x: w * 0.84, y: h * 0.9 };
     }
@@ -250,53 +250,125 @@
     return out;
   };
 
-  F.drawScreen = function (c) {
-    const s = this.scr, S = this.scope, p = S.p;
-    c.fillStyle = '#010103'; c.beginPath(); c.roundRect(s.x0, s.y0, s.x1 - s.x0, s.y1 - s.y0, 10); c.fill();
-    c.strokeStyle = 'rgba(255,255,255,.16)'; c.lineWidth = 1; c.stroke();
-    c.font = `600 11px ${DISP}`; c.fillStyle = 'rgba(190,200,215,.75)'; c.textAlign = 'left'; c.textBaseline = 'bottom';
-    c.fillText('NHÌN QUA KÍNH PHÂN QUANG', s.x0 + 2, s.y0 - 7);
-    const y0 = s.y0 + 8, y1 = s.y1 - (this.opt.scale ? 22 : 8);
+  // Ảnh qua thị kính, đọc từ trên xuống theo nhiều lớp:
+  //  ① màu tổng hợp mắt thấy  ② đồ thị cường độ I(λ)  ③ vạch phát xạ (bước sóng · nguồn gốc · năng lượng)
+  //  ④ phổ liên tục để đối chiếu  ⑤ thang bước sóng. Thị kính chỉ cho thấy dải 380–780 nm.
+  F.drawScreen = function (c, t) {
+    const s = this.scr, S = this.scope, p = S.p, W = s.x1 - s.x0, H = s.y1 - s.y0;
+    const f = this.cur(), lines = this.lines().filter((l) => l.nm >= 380 && l.nm <= 780);
+    const small = H < 190, pad = 14, hdr = 22, sc = this.opt.scale ? 20 : 6;
+    const X = (nm) => this.sx(nm);
+    // thân kính + mặt thị kính
+    c.save(); c.shadowColor = 'rgba(0,0,0,.6)'; c.shadowBlur = 24;
+    const bodyG = c.createLinearGradient(0, s.y0, 0, s.y1);
+    bodyG.addColorStop(0, '#171c27'); bodyG.addColorStop(1, '#090c12');
+    c.fillStyle = bodyG; c.beginPath(); c.roundRect(s.x0 - 6, s.y0 - 6, W + 12, H + 12, 16); c.fill();
+    c.restore();
+    c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 1; c.stroke();
+    c.fillStyle = '#010103'; c.beginPath(); c.roundRect(s.x0, s.y0, W, H, 11); c.fill();
+
+    const gy0 = s.y0 + hdr + 4, gy1 = gy0 + (H - hdr - sc) * (small ? 0.26 : 0.3);
+    const ly0 = gy1 + 6, ly1 = s.y1 - sc - (small ? 14 : 20) - 4;
+    const ry0 = ly1 + 4, ry1 = s.y1 - sc;
+
+    // tiêu đề + chip “mắt thấy”
+    c.font = `700 10px ${DISP}`; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillStyle = 'rgba(190,200,215,.8)';
+    c.fillText('ẢNH QUA THỊ KÍNH', s.x0 + pad, s.y0 + hdr / 2 + 3);
+    if (p > 0.05) {
+      const rgb = this.flameRGB(), name = f ? (this.myst ? 'màu chưa rõ nguồn' : 'lửa ' + f.look) : 'lửa đèn khí';
+      c.font = `500 10.5px ${BODY}`; const tw = c.measureText(name).width;
+      const cx = s.x1 - pad - tw - 22, cy = s.y0 + hdr / 2 + 3;
+      c.fillStyle = 'rgba(150,160,175,.75)'; c.textAlign = 'right'; c.font = `600 9.5px ${DISP}`; c.fillText('MẮT THẤY', cx - 6, cy);
+      const sw = c.createRadialGradient(cx + 6, cy, 0, cx + 6, cy, 9); sw.addColorStop(0, '#fff'); sw.addColorStop(0.35, AL.rgba(rgb, 1)); sw.addColorStop(1, AL.rgba(rgb, 0));
+      c.fillStyle = sw; c.beginPath(); c.arc(cx + 6, cy, 9, 0, Math.PI * 2); c.fill();
+      c.font = `500 10.5px ${BODY}`; c.textAlign = 'left'; c.fillStyle = '#dfe6f0'; c.fillText(name, cx + 18, cy);
+    }
+    // lưới thước ngắm
+    c.strokeStyle = 'rgba(255,255,255,.05)'; c.lineWidth = 1;
+    for (let nm = 400; nm <= 750; nm += 50) { const x = Math.round(X(nm)) + 0.5; c.beginPath(); c.moveTo(x, gy0); c.lineTo(x, ry1); c.stroke(); }
+
     if (p <= 0.01) {
-      c.font = `500 12px ${BODY}`; c.fillStyle = 'rgba(190,200,215,.45)'; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillText('Chưa có ánh sáng đi vào kính', (s.x0 + s.x1) / 2, (y0 + y1) / 2);
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.font = `500 12px ${BODY}`; c.fillStyle = 'rgba(190,200,215,.5)'; c.fillText('Chưa có ánh sáng đi vào kính', (s.x0 + s.x1) / 2, (gy0 + ly1) / 2 - 8);
+      c.font = `500 10.5px ${BODY}`; c.fillStyle = 'rgba(190,200,215,.35)'; c.fillText('Kéo lăng kính vào tia sáng để tách màu', (s.x0 + s.x1) / 2, (gy0 + ly1) / 2 + 10);
     } else {
-      c.save(); c.beginPath(); c.rect(s.x0 + 2, y0, s.x1 - s.x0 - 4, y1 - y0); c.clip();
+      // ② đồ thị cường độ: tổng các đỉnh Gauss (vạch hẹp ~1,6 nm; dải phân tử theo bề rộng thật)
+      const pts = [], step = 2; let max = 0.6;
+      for (let x = X(380); x <= X(780); x += step) {
+        const nm = 380 + ((x - X(380)) / (X(780) - X(380))) * 400;
+        let I = 0;
+        for (const l of lines) { const sg = l.w ? l.w / 2.355 : 1.6; I += l.I * Math.exp(-((nm - l.nm) ** 2) / (2 * sg * sg)); }
+        pts.push([x, nm, I]); if (I > max) max = I;
+      }
+      const gh = gy1 - gy0, yI = (I) => gy1 - (Math.min(I, max) / max) * gh * 0.9 * p;
+      for (const [x, nm, I] of pts) {
+        if (I < 0.004) continue;
+        c.fillStyle = AL.rgba(AL.nmRGB(nm), 0.55 * AL.nmVis(nm) + 0.15);
+        c.fillRect(x, yI(I), step + 0.5, gy1 - yI(I));
+      }
+      c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 1.2; c.beginPath();
+      pts.forEach(([x, , I], i) => (i ? c.lineTo(x, yI(I)) : c.moveTo(x, yI(I)))); c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.1)'; c.fillRect(s.x0 + pad, gy1, W - pad * 2, 1);
+      c.font = `500 9px ${MONO}`; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = 'rgba(170,180,195,.6)';
+      c.fillText('cường độ I(λ)', s.x0 + pad, gy0);
+
+      // ③ vạch phát xạ
+      c.save(); c.beginPath(); c.rect(s.x0 + 2, ly0, W - 4, ly1 - ly0); c.clip();
       c.globalCompositeOperation = 'lighter';
-      for (const l of this.lines()) {
-        const a = Math.min(1, l.I * p) * (0.4 + 0.6 * AL.nmVis(l.nm)); if (a < 0.01) continue;
-        const x = this.sx(l.nm), rgb = AL.nmRGB(l.nm);
+      const flick = 0.92 + 0.08 * Math.sin((t || 0) * 9);
+      for (const l of lines) {
+        const a = Math.min(1, l.I * p * flick) * (0.4 + 0.6 * AL.nmVis(l.nm)); if (a < 0.01) continue;
+        const x = X(l.nm), rgb = AL.nmRGB(l.nm);
         if (l.w) {
-          const ww = Math.max(6, (l.w / 400) * (s.x1 - s.x0));
+          const ww = Math.max(6, (l.w / 400) * W);
           const g = c.createLinearGradient(x - ww, 0, x + ww, 0);
           g.addColorStop(0, AL.rgba(rgb, 0)); g.addColorStop(0.5, AL.rgba(rgb, a * 0.8)); g.addColorStop(1, AL.rgba(rgb, 0));
-          c.fillStyle = g; c.fillRect(x - ww, y0, ww * 2, y1 - y0);
+          c.fillStyle = g; c.fillRect(x - ww, ly0, ww * 2, ly1 - ly0);
         } else {
-          const g = c.createLinearGradient(x - 10, 0, x + 10, 0);
-          g.addColorStop(0, AL.rgba(rgb, 0)); g.addColorStop(0.5, AL.rgba(rgb, a * 0.6)); g.addColorStop(1, AL.rgba(rgb, 0));
-          c.fillStyle = g; c.fillRect(x - 10, y0, 20, y1 - y0);
-          c.fillStyle = AL.rgba(AL.mixRGB(rgb, [255, 255, 255], 0.35 * a), a); c.fillRect(x - 1, y0, 2, y1 - y0);
+          const g = c.createLinearGradient(x - 12, 0, x + 12, 0);
+          g.addColorStop(0, AL.rgba(rgb, 0)); g.addColorStop(0.5, AL.rgba(rgb, a * 0.55)); g.addColorStop(1, AL.rgba(rgb, 0));
+          c.fillStyle = g; c.fillRect(x - 12, ly0, 24, ly1 - ly0);
+          c.fillStyle = AL.rgba(AL.mixRGB(rgb, [255, 255, 255], 0.4 * a), a); c.fillRect(x - 1, ly0, 2, ly1 - ly0);
         }
       }
-      c.globalCompositeOperation = 'source-over';
       c.restore();
+      // nhãn: bước sóng · nguồn gốc (nguyên tử / phân tử) · năng lượng photon
       if (this.opt.names && p > 0.6) {
         const placed = [];
-        c.font = `600 10px ${MONO}`; c.textAlign = 'center'; c.textBaseline = 'top';
-        this.lines().filter((l) => l.I > 0.3 && l.nm >= 380 && l.nm <= 780).sort((a, b) => b.I - a.I).forEach((l) => {
-          const x = this.sx(l.nm); if (placed.some((q) => Math.abs(q - x) < 34)) return; placed.push(x);
-          c.fillStyle = 'rgba(255,255,255,.85)'; c.fillText(fmt(l.nm, l.w ? 0 : 1), x, y0 + 3);
+        lines.filter((l) => l.I > 0.25).sort((a, b) => b.I - a.I).slice(0, small ? 3 : 5).forEach((l) => {
+          const x = X(l.nm); if (placed.some((q) => Math.abs(q - x) < 54)) return; placed.push(x);
+          const info = D.line(l.id) || {}, mol = info.mol;
+          const who = this.myst ? (mol ? 'dải phân tử' : 'vạch nguyên tử') : (mol ? mol + ' (phân tử)' : ((D.sp(info.sp) || {}).sym || '') + ' (nguyên tử)');
+          c.textAlign = x > s.x1 - 70 ? 'right' : x < s.x0 + 70 ? 'left' : 'center'; c.textBaseline = 'top';
+          c.font = `700 10.5px ${MONO}`; c.fillStyle = '#fff'; c.fillText(fmt(l.nm, l.w ? 0 : 1) + ' nm', x, ly0 + 4);
+          c.font = `500 9.5px ${BODY}`; c.fillStyle = mol ? '#ffcf8a' : '#a9e7ff'; c.fillText(who, x, ly0 + 18);
+          if (!small) { c.font = `500 9.5px ${MONO}`; c.fillStyle = 'rgba(200,210,225,.65)'; c.fillText(fmt(AL.eV(l.nm), 2) + ' eV', x, ly0 + 31); }
         });
       }
     }
+    // ④ phổ liên tục tham chiếu
+    for (let x = X(380); x < X(780); x += 2) {
+      const nm = 380 + ((x - X(380)) / (X(780) - X(380))) * 400;
+      c.fillStyle = AL.rgba(AL.nmRGB(nm), 0.45 * AL.nmVis(nm) + 0.05); c.fillRect(x, ry0, 2, ry1 - ry0);
+    }
+    if (!small) {
+      c.font = `500 9px ${BODY}`; c.textAlign = 'right'; c.textBaseline = 'bottom'; c.fillStyle = 'rgba(170,180,195,.55)';
+      c.fillText('phổ liên tục để đối chiếu', s.x1 - pad, ry0 - 2);
+    }
+    // ⑤ thang bước sóng
     if (this.opt.scale) {
       c.font = `500 9.5px ${MONO}`; c.textAlign = 'center'; c.textBaseline = 'bottom';
       for (let nm = 400; nm <= 750; nm += 50) {
-        const x = this.sx(nm);
-        c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(x - 0.5, y1 + 1, 1, 4);
-        c.fillStyle = 'rgba(190,200,215,.55)'; c.fillText(nm, x, s.y1 - 3);
+        const x = X(nm);
+        c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(x - 0.5, ry1, 1, 4);
+        c.fillStyle = 'rgba(190,200,215,.6)'; c.fillText(nm, x, s.y1 - 3);
       }
     }
+    // tối mép như nhìn qua ống kính
+    const v = c.createLinearGradient(s.x0, 0, s.x1, 0);
+    v.addColorStop(0, 'rgba(1,1,3,.85)'); v.addColorStop(0.035, 'rgba(1,1,3,0)'); v.addColorStop(0.965, 'rgba(1,1,3,0)'); v.addColorStop(1, 'rgba(1,1,3,.85)');
+    c.fillStyle = v; c.fillRect(s.x0, gy0, W, ry1 - gy0);
+    c.strokeStyle = 'rgba(255,255,255,.14)'; c.lineWidth = 1; c.beginPath(); c.roundRect(s.x0 + 0.5, s.y0 + 0.5, W - 1, H - 1, 11); c.stroke();
   };
 
   F.drawRays = function (c) {
@@ -409,7 +481,7 @@
     const lines = f.lines.filter((l) => !l.mol).map((l) => fmt(l.nm, 1)).join(' / ');
     const bands = f.lines.filter((l) => l.mol).map((l) => `${l.mol} ~${fmt(l.nm, 0)}`).join(', ');
     if (!on) return `<p><b>${sp.name}</b> (${f.salt}) cho lửa màu <b>${f.look}</b>. Mắt chỉ thấy màu tổng hợp. Hãy cho ánh sáng đi qua ${T('kính phân quang', 'spectroscope')} để xem màu này gồm những vạch nào.</p>`;
-    return `<p>Màu ${f.look} thực ra gồm: vạch <b>${lines} nm</b>${bands ? ` và ${T('dải phân tử', 'band')} ${bands} nm` : ''}. Bộ vạch này là ${T('“dấu vân tay ánh sáng”', 'linespec')} riêng của ${sp.name}.</p><p class="muted">${AL.esc(f.tip)}</p>`;
+    return `<p>Màu ${f.look} thực ra gồm: vạch <b>${lines} nm</b>${bands ? ` và ${T('dải phân tử', 'band')} ${bands} nm` : ''}. Bộ vạch này là ${T('“dấu vân tay ánh sáng”', 'linespec')} riêng của ${sp.name}.</p><p class="muted">${AL.esc(f.tip)}</p><p class="src">Nguồn: NIST ASD (vạch nguyên tử); Gaydon (1974), <i>The Spectroscopy of Flames</i> (dải phân tử)</p>`;
   };
   F.updateExplain = function () { if (this.explainEl) this.explainEl.innerHTML = this.explainHTML(); };
 

@@ -85,8 +85,22 @@
       const s = (this.s = { lam: 557.7 });
       const toPos = (nm) => (Math.log(nm / 100) / Math.log(15)) * 100, toNm = (p) => 100 * Math.pow(15, p / 100);
       const read = h('div', { class: 'cx-read' });
-      const upd = () => { const nm = s.lam, reg = AL.region(nm); read.innerHTML = `λ = <b style="color:${AL.rgba(nmCol(nm), 1)}">${AL.fmtNm(nm)}</b> · f = ${AL.sci(AL.freq(nm))} Hz · E = <b>${fmt(AL.eV(nm), 2)} eV</b> · ${reg === 'VIS' ? AL.colorName(nm) : reg === 'UV' ? 'tử ngoại' : 'hồng ngoại'}`; };
+      const upd = () => { const nm = s.lam, reg = AL.region(nm); if (this.w3) this.w3.set(nm); read.innerHTML = `λ = <b style="color:${AL.rgba(nmCol(nm), 1)}">${AL.fmtNm(nm)}</b> · f = ${AL.sci(AL.freq(nm))} Hz · E = <b>${fmt(AL.eV(nm), 2)} eV</b> · ${reg === 'VIS' ? AL.colorName(nm) : reg === 'UV' ? 'tử ngoại' : 'hồng ngoại'}`; };
       const sl = slider('Bước sóng λ', 0, 100, 0.1, toPos(s.lam), (p) => AL.fmtNm(toNm(p)), (p) => { s.lam = toNm(p); upd(); });
+      // Tùy chọn: xem sóng điện từ 3D (E ⟂ B ⟂ phương truyền), tải three.js khi cần
+      const view = seg([['2d', 'Đồ thị bước sóng (2D)'], ['3d', 'Sóng điện từ 3D']], this.w3on ? '3d' : '2d', async (v) => {
+        this.w3on = v === '3d';
+        if (this.w3on && !this.w3) {
+          try {
+            const mod = await import(new URL('assets/js/wave3d.js', document.baseURI).href);
+            if (CX.cur !== this || !this.w3on) return;
+            this.w3 = mod.create(document.getElementById('cx-stage'));
+          } catch (e) { this.w3on = false; return; }
+        }
+        if (this.w3) { this.w3.set(s.lam); this.w3.show(this.w3on); }
+      });
+      ctl.append(view);
+      if (this.w3on) view.querySelector('[aria-checked="true"]').click();
       ctl.append(sl, chips([['Hα 656,3', 656.3], ['Na 589,0', 589], ['O 557,7', 557.7], ['Hβ 486,1', 486.1], ['N₂⁺ 427,8', 427.8], ['UV 250', 250], ['IR 1000', 1000]], (v) => { s.lam = v; sl.set(toPos(v)); upd(); }), read);
       upd();
     },
@@ -121,8 +135,14 @@
       c.fillStyle = '#fff'; c.beginPath(); c.moveTo(mx - 6, sy - 9); c.lineTo(mx + 6, sy - 9); c.lineTo(mx, sy - 1); c.fill();
       txt(c, 'vùng mắt người nhìn thấy: 380–780 nm', (X(380) + X(780)) / 2, sy - 18, { align: 'center', font: `500 11px ${BODY}`, color: 'rgba(210,220,235,.7)' });
     },
-    text: 'Ánh sáng vừa là sóng điện từ, vừa là dòng các hạt photon. Bước sóng λ quyết định màu sắc và năng lượng của mỗi photon theo hệ thức E = hc/λ. Mắt người chỉ cảm nhận được bức xạ có λ trong khoảng 380–780 nm; ngắn hơn là tử ngoại (UV), dài hơn là hồng ngoại (IR).',
-    key: 'λ càng ngắn thì tần số càng lớn và photon càng nhiều năng lượng. Ánh sáng tím (≈ 400 nm) mang khoảng 3,1 eV; ánh sáng đỏ (≈ 700 nm) khoảng 1,8 eV.',
+    text: [
+      'Ánh sáng có hai “gương mặt”. Khi lan truyền, nó cư xử như một con sóng; nhưng khi trao đổi năng lượng với vật chất, nó lại đi thành từng gói nhỏ gọi là <b>photon</b>.',
+      'Khoảng cách giữa hai đỉnh sóng là <b>bước sóng λ</b>. Bước sóng quyết định cả màu sắc lẫn năng lượng của mỗi photon qua hệ thức $E = \\dfrac{hc}{\\lambda}$: sóng càng “dày” (λ ngắn) thì photon càng mạnh.',
+      'Mắt người chỉ cảm nhận được bước sóng trong khoảng 380–780 nm. Ngắn hơn là tử ngoại (UV), dài hơn là hồng ngoại (IR); cả hai đều có thật, chỉ là ta không nhìn thấy.',
+      'Bật <b>Sóng điện từ 3D</b> để nhìn rõ “con sóng” ánh sáng: một điện trường $\vec E$ và một từ trường $\vec B$ dao động cùng pha, vuông góc với nhau và cùng vuông góc với phương truyền. Hai trường liên tục sinh ra nhau, nên sóng tự lan đi trong chân không với tốc độ $c \approx 3 \times 10^{8}\ \mathrm{m/s}$, không cần môi trường nào.',
+    ],
+    key: 'λ càng ngắn, photon càng nhiều năng lượng. Ánh sáng tím (≈ 400 nm) mang khoảng 3,1 eV, gần gấp đôi ánh sáng đỏ (≈ 700 nm, khoảng 1,8 eV).',
+    refs: ['upv3', 'codata', 'cie', 'griffiths'],
   });
 
   // 2 — Năng lượng lượng tử hóa: chỉ hấp thụ đúng ΔE
@@ -175,8 +195,13 @@
       c.fillStyle = '#fff'; const mx = X(s.lam); c.beginPath(); c.moveTo(mx - 5, sy - 8); c.lineTo(mx + 5, sy - 8); c.lineTo(mx, sy - 1); c.fill();
       txt(c, 'phổ ánh sáng sau khi đi qua khí hydrogen (vạch tối = bị hấp thụ)', 30, sy - 14, { font: `500 10.5px ${BODY}`, color: 'rgba(190,200,215,.6)' });
     },
-    text: 'Năng lượng của electron trong nguyên tử chỉ nhận những giá trị xác định. Một photon chỉ bị hấp thụ khi năng lượng của nó đúng bằng khoảng cách ΔE giữa mức hiện tại và một mức cao hơn; mọi photon khác đi xuyên qua nguyên tử. Kéo thanh trượt để tìm những bước sóng mà hydrogen hấp thụ.',
-    key: 'Nguyên tử chỉ nhận “trọn gói” đúng ΔE, không nhận một phần. Những bước sóng bị hấp thụ tạo thành các vạch tối trong quang phổ.',
+    text: [
+      'Hãy hình dung electron trong nguyên tử như một người đứng trên cầu thang: chỉ được đứng trên từng bậc, không có chỗ đứng lơ lửng giữa hai bậc. Mỗi bậc là một <b>mức năng lượng</b>. Người ta nói năng lượng đã bị <b>lượng tử hóa</b>.',
+      'Vì thế nguyên tử rất “kén chọn”. Nó chỉ hấp thụ photon có năng lượng <b>vừa khít</b> khoảng cách ΔE giữa bậc đang đứng và một bậc cao hơn; photon thiếu hay thừa một chút đều đi xuyên qua.',
+      'Trong mô phỏng, electron của hydrogen đang ở mức n = 2. Kéo thanh trượt để tìm những bước sóng mà nó chịu “nhận”.',
+    ],
+    key: 'Nguyên tử chỉ nhận trọn gói đúng ΔE, không nhận một phần. Những bước sóng bị hấp thụ hiện ra thành các vạch tối trong quang phổ.',
+    refs: ['upv3', 'chem2e', 'bohr'],
   });
 
   // 3 — Phát xạ photon: ΔE quyết định màu
@@ -222,8 +247,12 @@
       s.hist = s.hist.filter((m) => m.a > 0);
       txt(c, `λ = 1240 / ${fmt(s.dE, 2)} ≈ ${fmt(lam, 1)} nm · ${AL.colorName(lam)}`, w < 560 ? 16 : w * 0.55, w < 560 ? 18 : hh * 0.32, { font: `700 ${w < 560 ? 13 : 15}px ${MONO}`, color: AL.rgba(rgb, 1) });
     },
-    text: 'Electron ở trạng thái kích thích không bền. Khi chuyển về mức thấp hơn, nó giải phóng phần năng lượng chênh lệch ΔE dưới dạng một photon. Hai mức càng cách xa nhau, photon càng mang nhiều năng lượng và bước sóng càng ngắn (lệch về phía xanh, tím).',
-    key: 'λ (nm) ≈ 1240 / ΔE (eV). Mỗi nguyên tố có bộ khoảng cách ΔE riêng, nên phát ra bộ màu riêng.',
+    text: [
+      'Một electron vừa được “đẩy” lên bậc cao giống như quả bóng đặt trên mép bàn: sớm muộn nó cũng rơi xuống. Trạng thái này gọi là <b>trạng thái kích thích</b>, và thường chỉ kéo dài cỡ một phần trăm triệu giây.',
+      'Khi electron trở về bậc thấp hơn, phần năng lượng dư ΔE được gói thành <b>một photon</b> và bay ra ngoài. Hai bậc càng cách xa, photon càng nhiều năng lượng, bước sóng càng ngắn và màu càng lệch về phía lam, tím.',
+    ],
+    key: '$\\lambda\\,(\\mathrm{nm}) \\approx \\dfrac{1240}{\\Delta E\\,(\\mathrm{eV})}$. Mỗi nguyên tố có bộ “bậc thang” riêng, nên phát ra bộ màu riêng.',
+    refs: ['upv3', 'chem2e', 'nist'],
   });
 
   // 4 — Các dãy phổ của hydrogen
@@ -261,8 +290,12 @@
       const name = { 1: 'Dãy Lyman: toàn bộ nằm trong vùng tử ngoại', 2: 'Dãy Balmer: bốn vạch nằm trong vùng khả kiến', 3: 'Dãy Paschen: toàn bộ nằm trong vùng hồng ngoại' }[nl];
       txt(c, name, 30, sy - 14, { font: `600 11.5px ${BODY}`, color: 'rgba(220,228,240,.85)' });
     },
-    text: 'Các vạch của hydrogen được xếp thành dãy theo mức cuối của chuyển mức. Về n = 1, khoảng cách năng lượng rất lớn nên photon thuộc vùng tử ngoại (dãy Lyman). Về n = 2, ΔE vừa đủ để photon nằm trong vùng khả kiến (dãy Balmer). Về n = 3, ΔE nhỏ nên photon thuộc vùng hồng ngoại (dãy Paschen).',
-    key: 'Chỉ dãy Balmer nhìn thấy được: 656,3 · 486,1 · 434,0 · 410,2 nm. Vạch Hα 656,3 nm tạo màu hồng đỏ của các tinh vân phát xạ.',
+    text: [
+      'Hydrogen chỉ có một electron, nên các mức năng lượng của nó tuân theo một công thức rất gọn: $E_n = -\\dfrac{13{,}6\\ \\mathrm{eV}}{n^2}$. Các vạch phổ được xếp thành <b>dãy</b> theo bậc mà electron rơi về.',
+      'Rơi về <b>n = 1</b>: cú rơi rất lớn, photon thuộc vùng tử ngoại (dãy Lyman). Rơi về <b>n = 2</b>: ΔE vừa đủ để photon nằm trong vùng mắt thấy được (dãy Balmer). Rơi về <b>n = 3</b>: ΔE nhỏ, photon thuộc vùng hồng ngoại (dãy Paschen).',
+    ],
+    key: 'Chỉ dãy Balmer nhìn thấy được bằng mắt: 656,3 · 486,1 · 434,0 · 410,2 nm. Vạch đỏ Hα 656,3 nm tạo nên màu hồng đỏ của các tinh vân như Tinh vân Lạp Hộ (M42).',
+    refs: ['upv3', 'bohr', 'nist'],
   });
 
   // 5 — Quang phổ liên tục, phát xạ và hấp thụ
@@ -321,8 +354,12 @@
       txt(c, label, sx0, sy - 14, { font: `600 12px ${BODY}`, color: '#e8edf5' });
       txt(c, 'các vạch tối nằm đúng vị trí vạch sáng của cùng nguyên tố', sx0, hh * 0.9, { font: `500 11px ${BODY}`, color: s.mode === 'abs' ? 'rgba(255,190,130,.9)' : 'rgba(0,0,0,0)' });
     },
-    text: 'Vật rắn hoặc khí đặc nóng sáng phát ra quang phổ liên tục. Khí loãng bị nung nóng chỉ phát ra một số bước sóng xác định (quang phổ vạch phát xạ). Khi ánh sáng liên tục đi qua một đám khí nguội hơn, chính những bước sóng đó bị hấp thụ, tạo thành các vạch tối (quang phổ vạch hấp thụ).',
-    key: 'Vạch tối và vạch sáng của cùng một nguyên tố nằm ở cùng bước sóng. Nhờ vậy, các vạch tối trong quang phổ Mặt Trời và các ngôi sao cho biết thành phần hóa học của chúng.',
+    text: [
+      'Năm 1860, Kirchhoff và Bunsen tóm gọn ba quy luật mà đến nay vẫn là nền móng của quang phổ học:',
+      '<ul><li>Vật rắn, chất lỏng hoặc khí rất đặc khi nóng sáng cho <b>quang phổ liên tục</b>, trải đủ mọi màu.</li><li>Khí loãng được nung nóng chỉ phát ra vài màu xác định: <b>quang phổ vạch phát xạ</b>.</li><li>Ánh sáng liên tục đi qua một lớp khí nguội hơn bị “khoét” mất đúng những màu ấy: <b>quang phổ vạch hấp thụ</b>.</li></ul>',
+    ],
+    key: 'Vạch sáng và vạch tối của cùng một nguyên tố nằm ở cùng bước sóng. Nhờ vậy, chỉ cần phân tích ánh sáng, các nhà thiên văn biết được Mặt Trời và những ngôi sao xa xôi được làm từ gì.',
+    refs: ['kirchhoff', 'astro2e', 'nist'],
   });
 
   // 6 — Vạch nguyên tử và dải phân tử
@@ -373,8 +410,13 @@
       for (const L of lines) if (L.lam > 560 && L.lam < 660) { const x = X(L.lam), g = c.createLinearGradient(x - 14, 0, x + 14, 0), rgb = nmCol(L.lam); g.addColorStop(0, AL.rgba(rgb, 0)); g.addColorStop(0.5, AL.rgba(rgb, 0.5 * L.wgt)); g.addColorStop(1, AL.rgba(rgb, 0)); c.fillStyle = g; c.fillRect(x - 14, by, 28, 24); }
       c.restore();
     },
-    text: 'Nguyên tử tự do chỉ có các mức năng lượng điện tử, nên mỗi chuyển mức cho một vạch hẹp. Phân tử (như CaOH, SrOH hình thành trong ngọn lửa) còn dao động và quay, nên trên mỗi mức điện tử có thêm nhiều mức con. Các chuyển mức giữa những mức con này cho rất nhiều vạch nằm sát nhau.',
-    key: 'Nguyên tử → vạch hẹp; phân tử → dải rộng. Màu đỏ gạch của calcium và đỏ thẫm của strontium trong ngọn lửa chủ yếu đến từ dải phân tử.',
+    text: [
+      'Một nguyên tử đứng riêng lẻ chỉ có các bậc năng lượng của electron, nên mỗi lần chuyển mức cho ra một vạch mảnh.',
+      'Phân tử thì khác: ngoài electron, cả phân tử còn <b>dao động</b> và <b>quay</b>. Trên mỗi bậc lớn lại có rất nhiều bậc con xếp sát nhau. Hàng trăm chuyển mức giữa các bậc con này cho ra hàng trăm vạch chen chúc, nhìn qua kính phân quang thành một <b>dải</b> rộng.',
+      'Trong ngọn lửa, calcium và strontium kết hợp với gốc OH tạo ra các phân tử CaOH và SrOH, và chính các phân tử này phát ra phần lớn ánh sáng ta thấy.',
+    ],
+    key: 'Nguyên tử cho vạch hẹp, phân tử cho dải rộng. Màu đỏ gạch của calcium và đỏ thẫm của strontium trong ngọn lửa chủ yếu đến từ dải phân tử, không phải từ vạch nguyên tử.',
+    refs: ['gaydon', 'chem2e'],
   });
 
   // 7 — Trạng thái giả bền và dập tắt do va chạm
@@ -434,8 +476,12 @@
       if (!narrow) txt(c, '● nguyên tử O   ○ đang kích thích   · phân tử khí', px, by + 200, { font: `500 10.5px ${BODY}`, color: 'rgba(190,200,215,.6)' });
       txt(c, `≈ ${Math.round(300 - 200 * s.d)} km`, bx + 10, by + 14, { font: `700 12px ${MONO}`, color: '#ffb066' });
     },
-    text: 'Nguyên tử oxygen bị kích thích lên trạng thái ¹S hoặc ¹D cần một khoảng thời gian trước khi phát xạ (thời gian sống τ). Trong lúc chờ, nếu va chạm với phân tử khác, nó mất năng lượng mà không phát ra photon. Khí càng đặc, va chạm càng thường xuyên; trạng thái sống càng lâu càng dễ bị dập tắt.',
-    key: 'Ở trên cao (≈ 300 km), khí rất loãng nên cả hai vạch đều phát sáng. Xuống thấp, vạch đỏ (τ ≈ 110 s) bị dập tắt trước, chỉ còn vạch xanh lục (τ ≈ 0,74 s). Đó là lý do cực quang đỏ ở trên, xanh lục ở dưới.',
+    text: [
+      'Khi bị electron cực quang va vào, nguyên tử oxygen có thể lên trạng thái ¹S hoặc ¹D. Khác với trạng thái kích thích thông thường, đây là các trạng thái <b>giả bền</b>: nguyên tử phải “chờ” khá lâu mới phát sáng, khoảng <b>0,7 giây</b> với ¹S và khoảng <b>110 giây</b> với ¹D. Vạch phát ra từ chúng được gọi là vạch cấm.',
+      'Trong lúc chờ, nếu nguyên tử va phải một phân tử khác (chủ yếu là N₂ và O₂), năng lượng bị lấy mất mà không sinh ra ánh sáng. Hiện tượng này gọi là <b>dập tắt do va chạm</b>. Không khí càng đặc thì va chạm càng dày, và trạng thái nào phải chờ càng lâu thì càng dễ bị dập tắt.',
+    ],
+    key: 'Trên cao (khoảng 200–300 km), không khí loãng đến mức nguyên tử chờ được 110 giây: vạch đỏ 630 nm sáng lên. Ở khoảng 100–150 km chỉ trạng thái chờ ngắn ¹S còn kịp phát sáng: vạch xanh lục 557,7 nm. Vì thế cực quang thường đỏ ở trên, xanh lục ở dưới.',
+    refs: ['slanger', 'solomon', 'nist', 'rees'],
   });
 
   // 8 — Hạt mang điện trong từ trường Trái Đất
@@ -460,9 +506,7 @@
         }
       }
       // Trái Đất
-      const g = c.createRadialGradient(ex - re * 0.4, ey - re * 0.4, re * 0.1, ex, ey, re);
-      g.addColorStop(0, '#9fd3ff'); g.addColorStop(0.55, '#2f6fd1'); g.addColorStop(1, '#0b2257');
-      c.fillStyle = g; c.beginPath(); c.arc(ex, ey, re, 0, TAU); c.fill();
+      AL.drawEarth(c, ex, ey, re, t);
       txt(c, 'Trái Đất', ex, ey + re + 14, { align: 'center', font: `500 11px ${BODY}` });
       // vành đai cực quang quanh hai cực, sáng dần khi hạt đổ về
       s.aur = Math.max(0, (s.aur || 0) - dt * 0.15);
@@ -510,13 +554,32 @@
       s.hits = s.hits.filter((x) => x.t < 1.2);
       txt(c, s.on ? 'hạt bị dẫn theo đường sức, đổ về hai vùng cực' : 'không có từ trường: hạt lao thẳng vào phía ngày, ở mọi vĩ độ', 20, hh - 18, { font: `600 11.5px ${BODY}`, color: s.on ? '#9dffb0' : '#ffd59a' });
     },
-    text: 'Gió Mặt Trời là dòng hạt mang điện. Trong từ trường, lực Lorentz khiến hạt chuyển động xoắn quanh các đường sức từ thay vì đi thẳng. Từ trường Trái Đất có dạng gần giống một thanh nam châm: các đường sức hội tụ về hai cực, nên hạt bị dẫn xuống khí quyển ở các vùng vĩ độ cao.',
-    key: 'Từ trường vừa che chắn Trái Đất khỏi phần lớn gió Mặt Trời, vừa dẫn một phần hạt về hai cực, tạo thành vành đai cực quang quanh vùng cực.',
+    text: [
+      'Hạt mang điện không thể băng ngang đường sức từ. Lực Lorentz bắt chúng chuyển động <b>xoắn ốc dọc theo đường sức</b>, giống hạt cườm xâu trên sợi dây. Từ trường Trái Đất gần giống từ trường của một thanh nam châm: các đường sức chụm lại và cắm xuống khí quyển ở hai vùng quanh cực.',
+      'Gió Mặt Trời là dòng plasma thổi liên tục từ Mặt Trời, nhưng phần lớn nó bị từ trường Trái Đất chặn lại, tạo thành “bong bóng” bảo vệ gọi là <b>từ quyển</b>. Khi từ trường mang theo gió Mặt Trời “móc nối” với từ trường Trái Đất, năng lượng được dồn vào từ quyển và gia tốc các electron <b>vốn có sẵn trong từ quyển</b> lên vài nghìn eV. Chính những electron này trượt theo đường sức xuống tầng cao khí quyển và làm nó phát sáng.',
+    ],
+    key: 'Electron gây cực quang chủ yếu đến từ từ quyển, được gió Mặt Trời “tiếp năng lượng”, chứ không bay thẳng từ Mặt Trời tới. Chúng đổ xuống thành hai vành cực quang hình bầu dục bao quanh hai cực từ.',
+    refs: ['baumjohann', 'paschmann', 'swpcAurora'],
   });
 
   // ======================================================================
   // ĐIỀU KHIỂN USACODEX
   // ======================================================================
+  // ---------- Trích dẫn tài liệu ----------
+  // Định dạng gần APA 7: Tác giả (năm). Tiêu đề. Nguồn. DOI/URL
+  // Trích dẫn gọn: Tác giả (năm). Tên tài liệu. Nguồn.
+  AL.citeEl = function (r) {
+    if (!r) return document.createTextNode('');
+    const href = r.doi ? 'https://doi.org/' + r.doi : r.url;
+    const title = href ? h('a', { href, target: '_blank', rel: 'noopener' }, r.t) : h('i', null, r.t);
+    return h('li', { class: 'ref' }, `${r.au} (${r.y}). `, title, `. ${r.src}.`);
+  };
+  AL.renderRefs = function (el) {
+    if (!el) return;
+    const list = D.REF_ORDER.map((id) => D.refs[id]).sort((a, b) => a.au.localeCompare(b.au));
+    el.replaceChildren(h('ol', { class: 'refs refs-full' }, list.map((r) => AL.citeEl(r))));
+  };
+
   const CX = (AL.Codex = {
     concepts, cur: null, running: false, W: 0, H: 0,
     mount() {
@@ -533,8 +596,15 @@
       document.getElementById('cx-prev').onclick = () => this.step(-1);
       document.getElementById('cx-next').onclick = () => this.step(1);
       document.getElementById('cx-lab').onclick = () => { const cp = this.cur; this.dlg.close(); cp.lab[1](); };
+      AL.renderRefs(document.getElementById('ref-list'));
+      document.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-goref]'); if (!b) return;
+        const d = b.closest('dialog.modal'); if (d) d.close();
+        this.open('ref');
+        requestAnimationFrame(() => document.getElementById('refs-h').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      });
       new ResizeObserver(() => this.fit()).observe(document.getElementById('cx-stage'));
-      this.dlg.addEventListener('close', () => (this.running = false));
+      this.dlg.addEventListener('close', () => { this.running = false; for (const c of concepts) if (c.w3) { c.w3.destroy(); c.w3 = null; } });
     },
     fit() {
       const r = this.cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -548,13 +618,17 @@
     },
     show(id) {
       const i = Math.max(0, concepts.findIndex((c) => c.id === id)), cp = concepts[i];
+      for (const c of concepts) if (c.w3) { c.w3.destroy(); c.w3 = null; }
       this.cur = cp;
       concepts.forEach((c) => c.btn.setAttribute('aria-current', String(c === cp)));
       document.getElementById('cx-num').textContent = `Bài ${i + 1}/${concepts.length} · ${cp.group}`;
       document.getElementById('cx-title').textContent = cp.title;
       document.getElementById('cx-q').textContent = cp.q;
-      document.getElementById('cx-text').textContent = cp.text;
+      document.getElementById('cx-text').innerHTML = [].concat(cp.text).map((p) => (p.startsWith('<ul') ? p : `<p>${p}</p>`)).join('');
       document.getElementById('cx-key').textContent = cp.key;
+      this.renderExtra(cp);
+      const rf = document.getElementById('cx-refs');
+      if (rf) rf.replaceChildren(...(cp.refs || []).map((k) => AL.citeEl(D.refs[k], true)));
       document.getElementById('cx-lab').textContent = cp.lab[0] + ' →';
       document.getElementById('cx-prev').disabled = i === 0;
       document.getElementById('cx-next').disabled = i === concepts.length - 1;
@@ -564,6 +638,28 @@
       cp.btn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       document.getElementById('cx-view').scrollTop = 0;
       this.pane('sims');
+    },
+    // “Thử ngay”, “Hiểu lầm thường gặp” và “Tìm hiểu chuyên sâu” (nội dung trong codex-deep.js)
+    renderExtra(cp) {
+      const X = (AL.CODEX_DEEP || {})[cp.id] || {};
+      const short = (keys) => (keys || []).map((k) => D.refs[k]).filter(Boolean).map((r) => `${r.au.split(',')[0].replace(/\s*\(.*/, '')}${/&|,.*,/.test(r.au) ? ' và cs.' : ''} (${r.y})`).join('; ');
+      const tryBox = document.getElementById('cx-try');
+      tryBox.hidden = !X.try;
+      document.getElementById('cx-try-list').innerHTML = (X.try || []).map((t) => `<li>${t}</li>`).join('');
+      const myth = document.getElementById('cx-myth');
+      myth.hidden = !X.myth;
+      myth.innerHTML = X.myth ? `<div class="cm-col cm-no"><span class="cm-tag">✗ Hiểu lầm</span><p>${X.myth.wrong}</p></div>`
+        + `<div class="cm-col cm-yes"><span class="cm-tag">✓ Thực ra</span><p>${X.myth.right}</p>${X.myth.refs ? `<p class="src">Nguồn: ${short(X.myth.refs)}</p>` : ''}</div>` : '';
+      const deep = document.getElementById('cx-deep'), body = document.getElementById('cx-deep-body'), toc = document.getElementById('cx-deep-toc');
+      const secs = X.deep || [];
+      deep.hidden = !secs.length; deep.open = false;
+      document.getElementById('cx-deep-sub').textContent = secs.length ? `${secs.length} chủ đề · đọc khoảng ${Math.max(2, Math.round(secs.reduce((n, s) => n + s.p.join(' ').split(/\s+/).length, 0) / 200))} phút` : '';
+      toc.innerHTML = secs.map((s, i) => `<a href="#cxd-${cp.id}-${i}">${i + 1}. ${s.h}</a>`).join('');
+      body.innerHTML = secs.map((s, i) => `<section class="cxd-sec" id="cxd-${cp.id}-${i}"><h5><span>${i + 1}</span>${s.h}</h5>${s.p.map((p) => `<p>${p}</p>`).join('')}<p class="src">Nguồn: ${short(s.refs)}</p></section>`).join('');
+      toc.onclick = (e) => { const a = e.target.closest('a'); if (!a) return; e.preventDefault(); document.getElementById(a.getAttribute('href').slice(1)).scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+      // gộp nguồn của phần mở rộng vào danh sách nguồn của bài
+      const all = [...new Set([...(cp.refs || []), ...(X.myth ? X.myth.refs || [] : []), ...secs.flatMap((s) => s.refs || [])])];
+      const rf = document.getElementById('cx-refs'); if (rf) rf.replaceChildren(...all.map((k) => AL.citeEl(D.refs[k])));
     },
     step(d) { const i = concepts.indexOf(this.cur) + d; if (concepts[i]) this.show(concepts[i].id); },
     start() {

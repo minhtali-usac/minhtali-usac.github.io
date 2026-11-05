@@ -227,7 +227,7 @@
     const m = $('#mascot'), b = $('#mascot-bubble');
     b.textContent = text; m.classList.add('talk');
     m.classList.toggle('win', mood === 'win');
-    if (AL.Mascot3D) AL.Mascot3D.mood(mood === 'win' ? 'win' : 'talk');
+    if (AL.Mascot3D) AL.Mascot3D.mood(mood || 'talk');
     clearTimeout(bubbleT);
     bubbleT = setTimeout(() => m.classList.remove('talk', 'win'), Math.max(3500, text.length * 55));
   }

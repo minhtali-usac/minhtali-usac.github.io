@@ -15,12 +15,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="mode-basic">
 <div class="app" id="app">
 
-  <!-- ===== Header cố định (hệ nhận diện USAC / Astrosphere) ===== -->
+  <!-- ===== Header cố định (hệ nhận diện USAC) ===== -->
   <header class="hdr">
     <a class="brand" href="./" aria-label="Aurora-LAB, CLB Thiên văn USAC">
       <img class="brand-logo" src="assets/img/logo-usac.png" alt="Logo CLB Thiên văn USAC" width="44" height="44">
@@ -143,7 +146,7 @@
     <button type="button" role="tab" data-pane="sims" aria-selected="true">Mô phỏng khái niệm</button>
     <button type="button" role="tab" data-pane="data" aria-selected="false">Dữ liệu vạch phổ</button>
     <button type="button" role="tab" data-pane="ex" aria-selected="false">Bài tập</button>
-    <button type="button" role="tab" data-pane="ref" aria-selected="false">Ứng dụng &amp; tài liệu</button>
+    <button type="button" role="tab" data-pane="ref" aria-selected="false">Ứng dụng &amp; tài liệu tham khảo</button>
   </div>
 
   <div class="cx-pane cx-sims" data-pane="sims">
@@ -156,10 +159,31 @@
       </header>
       <div class="cx-stage" id="cx-stage"><canvas id="cx-canvas" role="img"></canvas></div>
       <div class="cx-controls" id="cx-controls"></div>
+      <section class="cx-try" id="cx-try" aria-labelledby="cx-try-h">
+        <h4 id="cx-try-h"><span aria-hidden="true">🧪</span> Thử ngay với mô phỏng</h4>
+        <ol id="cx-try-list"></ol>
+      </section>
       <div class="cx-body">
         <div class="cx-text" id="cx-text"></div>
-        <div class="cx-key"><b>Ghi nhớ</b><span id="cx-key"></span></div>
+        <aside class="cx-side">
+          <div class="cx-key"><b>Ghi nhớ</b><span id="cx-key"></span></div>
+          <div class="cx-src">
+            <b>Nguồn tham khảo</b>
+            <ul class="refs refs-short" id="cx-refs"></ul>
+            <button type="button" class="link-btn" data-goref>Xem toàn bộ tài liệu →</button>
+          </div>
+        </aside>
       </div>
+      <section class="cx-myth" id="cx-myth" aria-label="Hiểu lầm thường gặp"></section>
+      <details class="cx-deep" id="cx-deep">
+        <summary>
+          <span class="cxd-ic" aria-hidden="true">🔭</span>
+          <span class="cxd-t"><b>Tìm hiểu chuyên sâu</b><small id="cx-deep-sub">Dành cho bạn muốn đọc kỹ hơn</small></span>
+          <span class="cxd-arrow" aria-hidden="true">▾</span>
+        </summary>
+        <nav class="cxd-toc" id="cx-deep-toc" aria-label="Mục lục phần chuyên sâu"></nav>
+        <div class="cxd-body" id="cx-deep-body"></div>
+      </details>
       <footer class="cx-foot">
         <button type="button" class="btn-ghost" id="cx-prev">← Bài trước</button>
         <button type="button" class="btn-lab" id="cx-lab"></button>
@@ -171,17 +195,18 @@
   <div class="cx-pane drawer-body" data-pane="data" hidden>
     <section>
       <h3>Bảng dữ liệu vạch phổ</h3>
-      <p class="muted">Vạch nguyên tử theo NIST Atomic Spectra Database, bước sóng đo trong không khí (dưới 200 nm là trong chân không). Với dải phân tử, bảng ghi vị trí cực đại của dải. Bấm vào tiêu đề cột để sắp xếp.</p>
+      <p class="muted">Vạch nguyên tử lấy theo NIST Atomic Spectra Database (Kramida và cs., 2024), bước sóng đo trong không khí; riêng các vạch dưới 200 nm là bước sóng trong chân không. Với dải phân tử, bảng ghi vị trí đỉnh của dải theo Gaydon (1974). Bấm vào tiêu đề cột để sắp xếp.</p>
       <div class="calc">
         <label for="calc-nm">Tính năng lượng photon từ bước sóng λ</label>
         <div class="calc-row"><input type="number" id="calc-nm" value="557.7" min="50" max="5000" step="0.1" inputmode="decimal"><span>nm</span></div>
         <output id="calc-out" for="calc-nm"></output>
       </div>
+      <p class="muted small">Hằng số theo CODATA 2018 (Tiesinga và cs., 2021).</p>
       <div class="const-grid">
-        <div><b>h</b><span>Hằng số Planck</span><code>6,626 × 10<sup>−34</sup> J·s</code></div>
-        <div><b>c</b><span>Tốc độ ánh sáng</span><code>2,998 × 10<sup>8</sup> m/s</code></div>
-        <div><b>1 eV</b><span>Electronvolt</span><code>1,602 × 10<sup>−19</sup> J</code></div>
-        <div><b>hc</b><span>Tích h·c</span><code>1239,84 eV·nm</code></div>
+        <div><b>$h$</b><span>Hằng số Planck</span><span class="cv">$6{,}626 \times 10^{-34}\ \mathrm{J\cdot s}$</span></div>
+        <div><b>$c$</b><span>Tốc độ ánh sáng</span><span class="cv">$2{,}998 \times 10^{8}\ \mathrm{m/s}$</span></div>
+        <div><b>$1\ \mathrm{eV}$</b><span>Electronvolt</span><span class="cv">$1{,}602 \times 10^{-19}\ \mathrm{J}$</span></div>
+        <div><b>$hc$</b><span>Tích $h \cdot c$</span><span class="cv">$1239{,}84\ \mathrm{eV\cdot nm}$</span></div>
       </div>
       <div class="table-wrap"><table class="data" id="codex-table"></table></div>
     </section>
@@ -190,15 +215,16 @@
   <div class="cx-pane drawer-body" data-pane="ex" hidden>
     <section>
       <h3>Bài tập</h3>
+      <p class="muted">Tự làm trước, rồi mới mở đáp án nhé. Mẹo nhỏ: $\lambda\,(\mathrm{nm}) \approx \dfrac{1240}{\Delta E\,(\mathrm{eV})}$.</p>
       <ol class="ex">
         <li>Tính năng lượng photon (eV) của vạch Hβ, λ = 486,1 nm.
-          <details><summary>Xem đáp án</summary><p>ΔE = 1240 / 486,1 ≈ <b>2,55 eV</b>.</p></details></li>
+          <details><summary>Xem đáp án</summary><p>$$\Delta E = \frac{hc}{\lambda} \approx \frac{1240}{486{,}1} \approx \mathbf{2{,}55\ eV}$$</p></details></li>
         <li>Electron của nguyên tử hydrogen chuyển từ mức n = 5 về n = 2. Tính bước sóng photon phát ra.
-          <details><summary>Xem đáp án</summary><p>ΔE = 13,6 × (1/4 − 1/25) = 13,6 × 0,21 ≈ 2,856 eV → λ ≈ 1240 / 2,856 ≈ <b>434 nm</b> (vạch Hγ, tím-lam).</p></details></li>
+          <details><summary>Xem đáp án</summary><p>$$\Delta E = 13{,}6 \left(\frac{1}{2^2} - \frac{1}{5^2}\right) = 13{,}6 \times 0{,}21 \approx 2{,}856\ \mathrm{eV}$$ $$\lambda \approx \frac{1240}{2{,}856} \approx \mathbf{434\ nm}$$ (vạch Hγ, tím-lam).</p></details></li>
         <li>Một photon có năng lượng 2,9 eV. Xác định màu của bức xạ và tiểu phân trong cực quang có thể phát ra nó.
-          <details><summary>Xem đáp án</summary><p>λ ≈ 1240 / 2,9 ≈ <b>428 nm</b>, màu tím-lam, ứng với vạch 427,8 nm của ion N₂⁺ ở tầng thấp (khoảng 90–110 km).</p></details></li>
+          <details><summary>Xem đáp án</summary><p>$$\lambda \approx \frac{1240}{2{,}9} \approx \mathbf{428\ nm}$$ màu tím-lam, ứng với vạch 427,8 nm của ion N₂⁺ ở tầng thấp (khoảng 90–110 km).</p></details></li>
         <li>Giải thích vì sao vạch đỏ 630 nm của oxygen hầu như không xuất hiện ở độ cao 100 km.
-          <details><summary>Xem đáp án</summary><p>Trạng thái ¹D có thời gian sống khoảng 110 s. Ở 100 km mật độ khí lớn, nguyên tử liên tục va chạm và mất năng lượng kích thích trước khi kịp phát xạ (dập tắt do va chạm).</p></details></li>
+          <details><summary>Xem đáp án</summary><p>Trạng thái ¹D phải “chờ” khoảng 110 s mới phát xạ. Ở 100 km không khí dày hơn tầng 250 km hàng nghìn lần, nên trong thời gian đó nguyên tử gần như chắc chắn va chạm với N₂, O₂ và mất năng lượng mà không phát sáng (dập tắt do va chạm).</p></details></li>
         <li>Một mẫu muối chưa biết cho ngọn lửa màu đỏ. Qua kính phân quang quan sát được một dải đỏ rộng 640–690 nm và một vạch lam 460,7 nm. Xác định kim loại trong mẫu.
           <details><summary>Xem đáp án</summary><p><b>Strontium</b>. Lithium cũng cho ngọn lửa đỏ nhưng chỉ có một vạch hẹp 670,8 nm và không có vạch lam 460,7 nm.</p></details></li>
         <li>Quang phổ Mặt Trời có một vạch tối ở 589 nm. Vạch này cho biết điều gì?
@@ -209,20 +235,64 @@
 
   <div class="cx-pane drawer-body" data-pane="ref" hidden>
     <section>
-      <h3>Ứng dụng của quang phổ phát xạ</h3>
-      <ul class="facts">
-        <li><b>Thiên văn học:</b> ánh sáng gần như là nguồn thông tin duy nhất từ các thiên thể. Phân tích vạch quang phổ cho biết thành phần hóa học, nhiệt độ và vận tốc của sao, tinh vân và thiên hà ở khoảng cách hàng tỷ năm ánh sáng.</li>
-        <li><b>Pháo hoa:</b> muối strontium cho màu đỏ thẫm, barium cho xanh lục, copper cho xanh lam, sodium cho vàng cam.</li>
-        <li><b>Hóa phân tích:</b> phép thử màu ngọn lửa là phương pháp định tính cổ điển để nhận biết ion kim loại; các kỹ thuật hiện đại như quang phổ phát xạ nguyên tử (AES, ICP-OES) dựa trên cùng nguyên lý.</li>
-        <li><b>Chiếu sáng:</b> đèn hơi sodium phát vạch vàng 589 nm; đèn neon và đèn huỳnh quang cũng dựa trên phát xạ của chất khí bị kích thích.</li>
-      </ul>
-      <h3>Tài liệu tham khảo</h3>
-      <ul class="facts">
-        <li><b>NIST Atomic Spectra Database</b> (physics.nist.gov/asd): bước sóng và mức năng lượng nguyên tử.</li>
-        <li><b>Giáo trình Vật lý đại cương và Hóa học đại cương:</b> cấu tạo nguyên tử, mô hình Bohr, quang phổ vạch.</li>
-        <li><b>NOAA Space Weather Prediction Center, NASA, Geophysical Institute (University of Alaska Fairbanks):</b> cực quang, gió Mặt Trời, chỉ số Kp.</li>
-        <li><b><i>Astronomy</i> (OpenStax):</b> quang phổ học trong thiên văn.</li>
-      </ul>
+      <h3>Quang phổ phát xạ dùng để làm gì?</h3>
+      <p class="muted">Cùng một ý tưởng (mỗi nguyên tố phát và hấp thụ những màu riêng) đang được dùng hằng ngày, từ đài thiên văn tới phòng thí nghiệm và cột đèn đường.</p>
+      <div class="app-grid">
+
+        <article class="app-card">
+          <figure class="app-fig">
+            <div class="app-img"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Fraunhofer_lines.svg?width=800" alt="Quang phổ Mặt Trời với các vạch tối Fraunhofer" loading="lazy" referrerpolicy="no-referrer" class="contain"></div>
+            <figcaption>Quang phổ Mặt Trời: mỗi vạch tối là dấu vết hấp thụ của một nguyên tố (D: sodium, C: hydrogen Hα, F: Hβ).<span class="credit">Ảnh: <a href="https://commons.wikimedia.org/wiki/File:Fraunhofer_lines.svg" target="_blank" rel="noopener">Wikimedia Commons</a></span></figcaption>
+          </figure>
+          <span class="app-ic" aria-hidden="true">✦</span>
+          <h4 class="app-title">Thiên văn học</h4>
+          <p>Với hầu hết thiên thể, ánh sáng gần như là “sứ giả” duy nhất mang thông tin về Trái Đất. Mỗi vạch tối trong quang phổ một ngôi sao là dấu vết của một nguyên tố trong lớp khí bên ngoài nó; đếm và đo độ đậm của các vạch cho biết ngôi sao làm từ gì và nóng bao nhiêu.</p>
+          <p>Năm 1868, khi quan sát nhật hoa trong một lần nhật thực, các nhà thiên văn thấy một vạch vàng ở 587,6 nm không khớp với nguyên tố nào đã biết. Nguyên tố mới được đặt tên <b>helium</b> (theo tiếng Hy Lạp <i>helios</i>, Mặt Trời), mãi 27 năm sau mới tìm thấy trên Trái Đất.</p>
+          <p>Khi nguồn sáng chuyển động, cả bộ vạch bị dịch nhẹ (hiệu ứng Doppler): lùi xa thì dịch về phía đỏ, tiến lại thì dịch về phía lam. Nhờ những dịch chuyển cực nhỏ này, năm 1995 người ta phát hiện hành tinh đầu tiên quay quanh một ngôi sao giống Mặt Trời.</p>
+          <p class="src">Nguồn: Fraknoi và cs. (2022); Mayor &amp; Queloz (1995)</p>
+        </article>
+
+        <article class="app-card">
+          <figure class="app-fig">
+            <div class="app-img"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Fireworks_2.jpg?width=800" alt="Pháo hoa trên bầu trời đêm" loading="lazy" referrerpolicy="no-referrer"></div>
+            <figcaption>Mỗi chùm sáng là phát xạ của nguyên tử và phân tử kim loại được nung nóng trong lửa.<span class="credit">Ảnh: <a href="https://commons.wikimedia.org/wiki/File:Fireworks_2.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></span></figcaption>
+          </figure>
+          <span class="app-ic" aria-hidden="true">✺</span>
+          <h4 class="app-title">Pháo hoa</h4>
+          <p>Mỗi màu pháo hoa là một phép thử ngọn lửa khổng lồ. Muối strontium cho màu đỏ, barium cho xanh lục, copper cho xanh lam, sodium cho vàng; trộn strontium với copper sẽ ra màu tím.</p>
+          <p>Điều thú vị là phần lớn ánh sáng không đến từ nguyên tử kim loại đứng riêng, mà từ các <b>phân tử nhỏ</b> sinh ra trong lửa như SrCl, SrOH, BaCl, CuCl. Vì vậy thợ làm pháo hoa thường thêm một chất giàu chlorine để các phân tử này hình thành dễ hơn.</p>
+          <p>Màu xanh lam là khó nhất: phân tử CuCl bị phá hủy nếu lửa quá nóng, nên pháo hoa xanh lam đẹp phải giữ nhiệt độ “vừa đủ”.</p>
+          <p class="src">Nguồn: Conkling &amp; Mocella (2011); Steinhauser &amp; Klapötke (2008)</p>
+        </article>
+
+        <article class="app-card">
+          <figure class="app-fig duo">
+            <div class="app-img"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Flametest--Na.swn.jpg?width=800" alt="Phép thử ngọn lửa của sodium cho màu vàng cam" loading="lazy" referrerpolicy="no-referrer"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Flametest--Cu.swn.jpg?width=800" alt="Phép thử ngọn lửa của copper cho màu xanh lục lam" loading="lazy" referrerpolicy="no-referrer"></div>
+            <figcaption>Phép thử ngọn lửa: sodium (trái) cho màu vàng cam, copper (phải) cho màu xanh lục lam.<span class="credit">Ảnh: Wikimedia Commons (<a href="https://commons.wikimedia.org/wiki/File:Flametest--Na.swn.jpg" target="_blank" rel="noopener">1</a>, <a href="https://commons.wikimedia.org/wiki/File:Flametest--Cu.swn.jpg" target="_blank" rel="noopener">2</a>)</span></figcaption>
+          </figure>
+          <span class="app-ic" aria-hidden="true">⚗</span>
+          <h4 class="app-title">Hóa phân tích</h4>
+          <p>Năm 1860, khi soi ánh sáng ngọn lửa của nước khoáng qua kính phân quang, Bunsen và Kirchhoff thấy hai vạch xanh lam lạ. Đó là một nguyên tố chưa ai biết: <b>caesium</b> (tiếng Latin <i>caesius</i> là xanh da trời). Năm sau, họ tìm ra <b>rubidium</b> nhờ các vạch đỏ sẫm.</p>
+          <p>Ngày nay, máy <b>ICP-OES</b> dùng plasma argon nóng khoảng 6000–10000 K để kích thích mẫu, rồi đo cùng lúc vạch phát xạ của hàng chục nguyên tố. Máy phát hiện được kim loại nặng ở nồng độ cỡ phần tỉ, nên được dùng để kiểm tra nước uống, đất và thực phẩm.</p>
+          <p class="src">Nguồn: Kirchhoff &amp; Bunsen (1860); Flowers và cs. (2019)</p>
+        </article>
+
+        <article class="app-card">
+          <figure class="app-fig">
+            <div class="app-img"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/LPS_Lamp_35W_running.jpg?width=800" alt="Bóng đèn sodium áp suất thấp đang sáng" loading="lazy" referrerpolicy="no-referrer"></div>
+            <figcaption>Đèn sodium áp suất thấp đang sáng: gần như toàn bộ ánh sáng nằm ở vạch đôi 589 nm.<span class="credit">Ảnh: <a href="https://commons.wikimedia.org/wiki/File:LPS_Lamp_35W_running.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></span></figcaption>
+          </figure>
+          <span class="app-ic" aria-hidden="true">◉</span>
+          <h4 class="app-title">Chiếu sáng</h4>
+          <p>Đèn đường <b>sodium áp suất thấp</b> gần như chỉ phát đúng vạch đôi vàng 589 nm. Chúng thuộc loại đèn tiết kiệm điện nhất, nhưng dưới ánh sáng một màu ấy mọi vật chỉ còn sắc vàng và xám: ta không phân biệt được chiếc xe đỏ với chiếc xe xanh.</p>
+          <p>Trong <b>đèn huỳnh quang</b>, hơi thủy ngân phát mạnh nhất ở 253,7 nm, vùng tử ngoại mắt không thấy. Lớp bột phủ trong ống hấp thụ tia UV ấy rồi phát lại ánh sáng nhìn thấy ở vài vùng lam, lục, đỏ; trộn lại, mắt ta thấy gần như ánh sáng trắng. Đèn neon thì dùng khí neon, cho màu đỏ cam đặc trưng.</p>
+          <p class="src">Nguồn: NIST ASD; Ling và cs. (2016)</p>
+        </article>
+      </div>
+
+      <h3 id="refs-h">Tài liệu tham khảo</h3>
+      <div id="ref-list"></div>
+      <p class="muted small">Ghi chú: hoạt cảnh mô phỏng đã được đơn giản hóa. Bước sóng và mức năng lượng là số liệu thật; tỉ lệ cường độ, tốc độ và hình dạng cực quang là minh họa gần đúng.</p>
     </section>
   </div>
 </dialog>
@@ -231,13 +301,13 @@
 <dialog class="modal" id="dlg-help" aria-labelledby="help-title">
   <div class="modal-head"><h2 id="help-title">Hướng dẫn sử dụng Aurora-LAB</h2><button type="button" class="icon-btn" data-close aria-label="Đóng">✕</button></div>
   <div class="modal-body">
-    <ol class="howto">
-      <li><b>Chọn thí nghiệm</b> trên thanh tab: Nguyên tử, Cực quang hoặc Ngọn lửa. Mỗi thí nghiệm giải đáp một câu hỏi khoa học.</li>
-      <li><b>Thực hiện lần lượt các bước 1 → 2 → 3</b> ở bảng điều khiển bên phải (trên điện thoại: kéo bảng điều khiển từ dưới lên).</li>
-      <li><b>Quan sát kết quả</b> trên hình và trên <b>thanh phổ 380–780 nm</b> ở phía dưới. Thanh phổ dùng chung cho cả ba thí nghiệm.</li>
+    <ol class="howto steps-cards">
+      <li><span class="hn">1</span><div><b>Chọn một câu hỏi</b><p>Ba tab Nguyên tử, Cực quang, Ngọn lửa là ba câu hỏi khoa học. Bắt đầu từ tab nào cũng được.</p></div></li>
+      <li><span class="hn">2</span><div><b>Làm theo các bước 1 → 2 → 3</b><p>Bảng điều khiển nằm bên phải; trên điện thoại, kéo nó từ dưới lên.</p></div></li>
+      <li><span class="hn">3</span><div><b>Quan sát và tự giải thích</b><p>Nhìn hình và <b>thanh phổ 380–780 nm</b> ở dưới cùng, rồi mở “Vì sao…?” để đối chiếu với suy nghĩ của bạn.</p></div></li>
     </ol>
     <h3>Chế độ Cơ bản và Đầy đủ</h3>
-    <p><b>Cơ bản</b>: thí nghiệm cùng các thao tác chính. <b>Đầy đủ</b>: bổ sung giá trị năng lượng, bảng chuyển mức, biểu đồ cường độ phát xạ theo độ cao và vạch tham chiếu trên thanh phổ.</p>
+    <p><b>Cơ bản</b> giữ màn hình gọn, chỉ những thao tác chính. <b>Đầy đủ</b> thêm số liệu năng lượng, bảng chuyển mức, biểu đồ cường độ theo độ cao và vạch tham chiếu trên thanh phổ, hợp khi bạn muốn đào sâu.</p>
     <h3>Liên kết giữa các thí nghiệm</h3>
     <p>Nguyên tố và vạch phổ đã chọn được giữ nguyên khi chuyển thí nghiệm. Ví dụ: chọn dải xanh lục ở thí nghiệm Cực quang rồi chuyển sang thí nghiệm Nguyên tử, bước chuyển mức 557,7 nm của oxygen sẽ được chuẩn bị sẵn.</p>
     <h3>Phím tắt</h3>
@@ -253,13 +323,23 @@
 <dialog class="modal" id="dlg-about" aria-labelledby="about-title">
   <div class="modal-head"><h2 id="about-title">Giới thiệu Aurora-LAB</h2><button type="button" class="icon-btn" data-close aria-label="Đóng">✕</button></div>
   <div class="modal-body">
-    <p><b>Aurora-LAB</b> là phòng thí nghiệm ảo về quang phổ phát xạ và cực quang do <b>CLB Thiên văn USAC</b> xây dựng, thuộc cùng hệ công cụ học tập với <b>Astrosphere</b>. Người học trực tiếp điều khiển thí nghiệm và quan sát ngay kết quả: electron chuyển mức năng lượng, photon được phát ra và quang phổ vạch hình thành trên thanh phổ.</p>
+    <p class="about-lead">Hầu hết những gì loài người biết về vũ trụ đều đến từ ánh sáng. <b>Aurora-LAB</b> được làm ra để bạn tự mình hiểu cách “đọc” thứ ánh sáng ấy.</p>
+    <p>Đây là phòng thí nghiệm ảo về ánh sáng của nguyên tử và cực quang, do <b>Nhóm Dự án Giáo dục Thiên văn &amp; Khoa học Thực nghiệm, CLB Thiên văn USAC</b> phát triển. Thay vì học thuộc định nghĩa, bạn tự tay “cấp năng lượng” cho electron, thay đổi năng lượng của dòng hạt đổ xuống khí quyển, đưa muối vào ngọn lửa, rồi nhìn quang phổ hình thành ngay trước mắt.</p>
+    <h3>Ba câu hỏi, một sợi chỉ xuyên suốt</h3>
     <ul class="facts">
       <li><b>Nguyên tử phát photon:</b> vì sao mỗi nguyên tố phát ra ánh sáng có màu riêng?</li>
-      <li><b>Cực quang theo độ cao:</b> vì sao cực quang có màu xanh lục, đỏ và tím?</li>
-      <li><b>Ngọn lửa → kính phân quang:</b> làm thế nào nhận biết nguyên tố chỉ từ ánh sáng của nó?</li>
+      <li><b>Cực quang theo độ cao:</b> vì sao bầu trời vùng cực sáng lên màu xanh lục, đỏ và tím?</li>
+      <li><b>Ngọn lửa → kính phân quang:</b> làm thế nào nhận ra một nguyên tố chỉ từ ánh sáng của nó?</li>
     </ul>
-    <p>Dữ liệu vạch phổ nguyên tử được tổng hợp theo NIST Atomic Spectra Database; kiến thức về cực quang theo tài liệu của NOAA và NASA.</p>
+    <p>Cả ba cùng dẫn tới một ý: <b>mỗi nguyên tố có một “dấu vân tay ánh sáng” riêng</b>. Hiểu được điều này, bạn cũng hiểu vì sao các nhà thiên văn biết được thành phần của những ngôi sao cách xa hàng nghìn năm ánh sáng.</p>
+    <h3>Vì sao chúng tôi làm Aurora-LAB?</h3>
+    <ul class="facts">
+      <li><b>Học bằng cách làm:</b> thí nghiệm quang phổ thật cần đèn khí, muối kim loại và kính phân quang, không phải lớp học nào cũng có. Ở đây, bạn chỉ cần một trình duyệt.</li>
+      <li><b>Thấy được điều mắt thường không thấy:</b> electron chuyển mức, photon tử ngoại, hay cực quang ở độ cao hàng trăm kilomet.</li>
+      <li><b>Chuẩn xác mà vẫn gần gũi:</b> số liệu lấy từ <b>NIST Atomic Spectra Database</b>, kiến thức đối chiếu với các bài báo khoa học có bình duyệt và tài liệu của <b>NOAA SWPC</b>, nhưng được kể bằng lời dễ hiểu (xem <button type="button" class="link-btn inline" data-goref>Tài liệu tham khảo</button>).</li>
+      <li><b>Mở cho mọi người:</b> học sinh, sinh viên, giáo viên dùng trong tiết học, hay bất kỳ ai từng ngước nhìn bầu trời và tò mò.</li>
+    </ul>
+    <p>Aurora-LAB là một phần trong hệ sinh thái giáo dục của CLB Thiên văn USAC (Trường Đại học Khoa học Tự nhiên, ĐHQG-HCM), cùng chung sứ mệnh <i>lan tỏa thiên văn học đến cộng đồng</i>. Tìm hiểu thêm về USAC tại <a href="https://web.clbtvusac.com" target="_blank" rel="noopener">web.clbtvusac.com</a>.</p>
     <div class="contact">
       <p class="contact-h">CLB Thiên văn USAC - Lan toả thiên văn đến cộng đồng</p>
       <p>Mọi sự góp ý và liên hệ xin gửi về email: <a href="mailto:clb.usac@gmail.com">clb.usac@gmail.com</a></p>
@@ -282,8 +362,10 @@
 <script src="assets/js/sim-atom.js"></script>
 <script src="assets/js/sim-aurora.js"></script>
 <script src="assets/js/sim-flame.js"></script>
+<script src="assets/js/codex-deep.js"></script>
 <script src="assets/js/codex.js"></script>
 <script src="assets/js/app.js"></script>
+<script src="assets/js/buddy.js"></script>
 <script type="module" src="assets/js/mascot3d.js"></script>
 </body>
 </html>
