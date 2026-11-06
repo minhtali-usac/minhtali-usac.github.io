@@ -139,6 +139,7 @@
     this.P = { x: C.x + 56, y: C.y + (wide ? 34 : 18), w: C.w - 56 - right, h: C.h - (wide ? 34 : 18) - 30 };
     this.ground = null;
     this.wind = []; this.rain = []; this.glows = [];
+    if (this.b3d && !this.b3d.hidden) this.place3d();
   };
   AU.yAlt = function (km) { const P = this.P; return P.y + P.h - (km / AXIS_TOP) * P.h; };
   AU.altY = function (y) { const P = this.P; return ((P.y + P.h - y) / P.h) * AXIS_TOP; };
@@ -637,8 +638,41 @@
   };
 
   AU.onState = function (s, ch) { if (ch.line || ch.el) this.status(); return ch.mode || ch.line; };
-  AU.enter = function () { this.status(); };
-  AU.leave = function () {};
+  // ---------- Khung 3D: Mặt Trời · gió Mặt Trời · từ quyển (tải three.js khi cần) ----------
+  AU.ui3d = function () {
+    const wrap = document.getElementById('canvas-wrap');
+    if (!this.b3d) {
+      this.b3d = AL.h('div', { class: 'se3d-ctl' },
+        AL.h('button', { type: 'button', class: 'se3d-btn', onclick: () => this.toggle3d() }, '🌐 Xem 3D'),
+        AL.h('button', { type: 'button', class: 'se3d-btn se3d-big', hidden: true, onclick: () => { this.big3d = !this.big3d; this.place3d(); } }, '⤢ Phóng to'));
+      wrap.append(this.b3d);
+    }
+    this.b3d.hidden = false; this.place3d();
+  };
+  AU.place3d = function () {
+    if (!this.b3d || !this.inset) return;
+    const I = this.big3d ? { x: 0, y: 0, w: this.W, h: this.H } : this.inset;
+    Object.assign(this.b3d.style, { left: (I.x + I.w - 8) + 'px', top: (I.y + (this.wide && !this.big3d ? 78 : 8)) + 'px' });
+    const [b1, b2] = this.b3d.children;
+    b1.textContent = this.on3d ? '✕ Tắt 3D' : '🌐 Xem 3D';
+    b2.hidden = !this.on3d; b2.textContent = this.big3d ? '⤡ Thu nhỏ' : '⤢ Phóng to';
+    if (this.se3d) this.se3d.place(I);
+  };
+  AU.toggle3d = async function () {
+    this.on3d = !this.on3d;
+    if (this.on3d && !this.se3d) {
+      try {
+        const mod = await import(new URL('assets/js/sunearth3d.js', document.baseURI).href);
+        this.se3d = mod.create(document.getElementById('canvas-wrap'), () => ({ flux: this.flux, rgb: GROUPS[this.dom || 'green'].rgb, E: this.E }));
+      } catch (e) { this.on3d = false; AL.app.say('Trình duyệt chưa hỗ trợ chế độ 3D (WebGL).'); }
+    }
+    if (!this.on3d) this.big3d = false;
+    if (this.se3d) this.se3d.show(this.on3d);
+    this.place3d();
+    if (this.on3d) AL.app.say('Đây là Mặt Trời, gió Mặt Trời và từ quyển trong 3D. Kéo để xoay xem từ nhiều phía, thử tăng “Hoạt động Mặt Trời” để thấy từ quyển bị ép lại và vành cực quang mở rộng!');
+  };
+  AU.enter = function () { this.status(); this.ui3d(); if (this.se3d && this.on3d) this.se3d.show(true); };
+  AU.leave = function () { if (this.b3d) this.b3d.hidden = true; if (this.se3d) this.se3d.show(false); };
   AU.primary = function () { this.view = this.view === 'section' ? 'ground' : 'section'; this.ground = null; AL.app.refreshPanel(); this.status(); };
   AU.accent = function () {
     const sel = AL.store.state.line, info = sel && D.line(sel);
