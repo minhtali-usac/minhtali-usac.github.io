@@ -121,6 +121,8 @@ function mount() {
   const size = () => btn.clientWidth || 72;
   let renderer;
   try { renderer = makeRenderer(size()); } catch (e) { return; } // không có WebGL: giữ ảnh tĩnh
+  // vẽ sẵn ở độ phân giải gấp ~2,2 lần để khi Sên phóng to (scale 2,1) vẫn sắc nét
+  renderer.setPixelRatio(Math.min(5, (window.devicePixelRatio || 1) * 2.2));
   const { scene, cam, m } = makeScene(); withEnv(renderer, scene);
   renderer.domElement.className = 'mascot-3d';
   btn.prepend(renderer.domElement);
