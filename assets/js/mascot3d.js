@@ -128,6 +128,7 @@ function mount() {
   new ResizeObserver(() => renderer.setSize(size(), size(), false)).observe(btn);
 
   let tx = 0, ty = 0, yaw = 0, pitch = 0, blinkAt = 2.5, mood = null, moodT = 0;
+  let run = 0, runK = 0, sleep = false, sleepK = 0; // run: hướng chạy (−1 trái, 1 phải, 0 đứng yên)
   window.addEventListener('pointermove', (e) => {
     const r = btn.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     tx = Math.max(-1, Math.min(1, (e.clientX - cx) / 500)); ty = Math.max(-1, Math.min(1, (e.clientY - cy) / 400));
@@ -136,7 +137,9 @@ function mount() {
   const clock = new THREE.Clock();
   const loop = () => {
     const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
-    yaw += (tx * 0.55 - yaw) * Math.min(1, dt * 4); pitch += (ty * 0.35 - pitch) * Math.min(1, dt * 4);
+    runK += ((run ? 1 : 0) - runK) * Math.min(1, dt * 6); sleepK += ((sleep ? 1 : 0) - sleepK) * Math.min(1, dt * 2);
+    const wantYaw = run ? run * 0.95 : tx * 0.55 * (1 - sleepK);
+    yaw += (wantYaw - yaw) * Math.min(1, dt * 5); pitch += ((sleep ? 0.38 : ty * 0.35) - pitch) * Math.min(1, dt * 4);
     m.root.position.y = Math.sin(t * 1.3) * 0.06;
     m.root.rotation.z = Math.sin(t * 0.9) * 0.05;
     m.head.rotation.set(pitch, yaw, 0); m.body.rotation.y = yaw * 0.3;
@@ -146,11 +149,16 @@ function mount() {
     blinkAt -= dt;
     const b = blinkAt < 0.12 ? 0.12 : 1;
     if (blinkAt < 0) blinkAt = 2.5 + Math.random() * 3;
-    m.eyes.forEach((e) => (e.scale.y = 0.088 * b));
+    m.eyes.forEach((e) => (e.scale.y = 0.088 * b * (1 - 0.9 * sleepK)));
+    // chạy: nảy theo nhịp bước và nghiêng người về phía trước
+    if (runK > 0.01) { m.root.position.y += Math.abs(Math.sin(t * 13)) * 0.2 * runK; m.root.rotation.z += -(run || 0) * 0.2 * runK; m.antennae.forEach((a) => (a.rotation.x -= 0.35 * runK)); }
+    // ngủ gật: thở chậm, đầu gục nhẹ
+    if (sleepK > 0.01) { m.root.position.y = Math.sin(t * 0.8) * 0.05 * sleepK - 0.06 * sleepK; m.antennae.forEach((a) => (a.rotation.x += 0.45 * sleepK)); }
     // cảm xúc
     if (mood) {
       moodT += dt;
-      if (mood === 'win') { const k = Math.min(1, moodT / 1.1); m.root.position.y += Math.sin(k * Math.PI) * 0.45; m.root.rotation.y = k * Math.PI * 2; if (k >= 1) { mood = null; m.root.rotation.y = 0; } }
+      if (mood === 'hop') { const k = Math.min(1, moodT / 0.55); m.root.position.y += Math.sin(k * Math.PI) * 0.55; if (k >= 1) mood = null; }
+      else if (mood === 'win') { const k = Math.min(1, moodT / 1.1); m.root.position.y += Math.sin(k * Math.PI) * 0.45; m.root.rotation.y = k * Math.PI * 2; if (k >= 1) { mood = null; m.root.rotation.y = 0; } }
       else if (mood === 'think') { const k = Math.min(1, moodT / 0.4) * Math.max(0, Math.min(1, (2.4 - moodT) / 0.4)); m.head.rotation.z = 0.28 * k; m.antennae.forEach((a, i) => (a.rotation.z += (i ? 0.25 : -0.25) * k)); if (moodT > 2.4) { mood = null; m.head.rotation.z = 0; } }
       else if (mood === 'sad') { const k = Math.min(1, moodT / 0.5) * Math.max(0, Math.min(1, (2.6 - moodT) / 0.5)); m.head.rotation.x += 0.32 * k; m.root.position.y -= 0.12 * k; m.antennae.forEach((a) => (a.rotation.x += 0.5 * k)); if (moodT > 2.6) mood = null; }
       else { m.head.rotation.x += Math.sin(moodT * 12) * 0.08 * Math.max(0, 1 - moodT / 1.2); if (moodT > 1.2) mood = null; }
@@ -160,8 +168,8 @@ function mount() {
   };
   requestAnimationFrame(loop);
 
-  AL.Mascot3D = { mood(x) { mood = x; moodT = 0; }, snapshot };
+  AL.Mascot3D = { mood(x) { mood = x; moodT = 0; }, run(d) { run = d || 0; }, sleep(v) { sleep = !!v; }, snapshot };
 }
 
-AL.Mascot3D = { mood() {}, snapshot };
+AL.Mascot3D = { mood() {}, run() {}, sleep() {}, snapshot };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();

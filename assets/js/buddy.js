@@ -65,6 +65,7 @@
   };
   function toggleMute() { setMuted(!muted()); paintMute(); say(muted() ? 'Mình sẽ im lặng. Cần gì cứ bấm vào mình nhé!' : 'Mình sẽ nhắc bạn khi cần.'); }
   function open() {
+    clearTimeout(Move.busy); clearTimeout(Move.back); go(0, 0); wake(); // menu luôn mở cạnh chỗ ở của Sên
     const host = $('#mascot').parentElement; if (menu.parentElement !== host) host.append(menu);
     menu.hidden = false; $('#mascot').setAttribute('aria-expanded', 'true'); mood('talk');
     menu.querySelector('.bd-item').focus({ preventScroll: true });
@@ -155,6 +156,94 @@
     reset();
   }
 
+  // ---------- Di chuyển: đi dạo, chạy tới nơi có chuyện, ngủ gật ----------
+  // Chỉ chạy khi: không mở cửa sổ/menu, chưa tắt nhắc, trang đang hiển thị và máy không yêu cầu giảm chuyển động.
+  const reduce = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const Move = { x: 0, y: 0, busy: 0, back: 0, sleeping: false };
+  const free = () => !reduce() && !muted() && !document.hidden && !document.querySelector('dialog[open]') && (!menu || menu.hidden);
+  function go(x, y, after) {
+    const m = $('#mascot'); if (!m) return;
+    const dx = x - Move.x, dist = Math.hypot(dx, y - Move.y);
+    const dur = Math.max(0.5, Math.min(2.4, dist / 520));
+    m.style.transitionDuration = dur + 's';
+    m.style.translate = x || y ? `${Math.round(x)}px ${Math.round(y)}px` : ''; // dùng `translate` riêng để không bị `scale` nhân lên
+    Move.x = x; Move.y = y;
+    if (AL.Mascot3D && Math.abs(dx) > 8) AL.Mascot3D.run(Math.sign(dx));
+    m.classList.toggle('bubble-left', window.innerWidth - 58 + x < window.innerWidth * 0.5); // bóng thoại mở về phía còn nhiều chỗ
+    clearTimeout(Move.busy);
+    Move.busy = setTimeout(() => { AL.Mascot3D && AL.Mascot3D.run(0); after && after(); }, dur * 1000);
+  }
+  // offset để tâm Sên tới gần một điểm trên màn hình (Sên ở góc dưới phải khi offset = 0)
+  function offsetFor(px, py) {
+    // mốc cố định: chỗ ở của Sên ở góc dưới phải (không đọc vị trí hiện tại vì có thể đang chạy dở hoặc đang phóng to)
+    const m = $('#mascot'), cs = getComputedStyle(m), w = m.offsetWidth, hgt = m.offsetHeight;
+    const hx = window.innerWidth - (parseFloat(cs.right) || 0) - w / 2, hy = window.innerHeight - (parseFloat(cs.bottom) || 0) - hgt / 2;
+    const tx = Math.max(50, Math.min(window.innerWidth - 50, px)), ty = Math.max(60, Math.min(window.innerHeight - 45, py));
+    return [tx - hx, ty - hy];
+  }
+  function home(delay = 0) { clearTimeout(Move.back); Move.back = setTimeout(() => go(0, 0), delay); }
+  function visit(px, py, opt = {}) {
+    if (!free()) return;
+    wake();
+    const [x, y] = offsetFor(px, py);
+    go(x, y, () => { if (opt.mood) mood(opt.mood); if (opt.say) say(opt.say, opt.mood); home(opt.stay || 3800); });
+  }
+  const visitEl = (el, opt) => { if (!el) return; const r = el.getBoundingClientRect(); if (!r.width) return; visit(r.left + r.width / 2, r.top - 46, opt); };
+
+  // phóng to một lúc cho vui rồi trở lại kích thước thường
+  function grow(ms = 2200, line) {
+    if (reduce() || document.querySelector('dialog[open]')) return;
+    const m = $('#mascot'); m.classList.toggle('grow-corner', !Move.x && !Move.y); m.classList.add('big'); mood('win');
+    if (line) say(line, 'win');
+    clearTimeout(Move.gt); Move.gt = setTimeout(() => m.classList.remove('big'), ms);
+  }
+  const GROW_LINES = ['Ta-da! Nhìn rõ bộ đồ phi hành gia của mình chưa?', 'Phóng to nè! Mình vừa tập thể dục trong không trọng lực đấy.', 'Bạn có biết? Ánh sáng từ Mặt Trời mất khoảng 8 phút 20 giây để tới Trái Đất.'];
+  function wander() {
+    clearTimeout(Move.wt);
+    Move.wt = setTimeout(() => {
+      if (free() && !Move.sleeping && !Move.x && !Move.y) {
+        const r = Math.random();
+        const W = window.innerWidth;
+        if (r < 0.55) { // đi dạo dọc mép dưới rồi về
+          const px = W * (0.15 + Math.random() * 0.6);
+          visit(px, window.innerHeight - 45, { mood: Math.random() < 0.5 ? 'hop' : 'think', stay: 2600 + Math.random() * 2000 });
+        } else if (r < 0.8) { // ghé thăm khu vực đang thí nghiệm
+          const st = document.querySelector('.stage'); if (st) { const b = st.getBoundingClientRect(); visit(b.left + b.width * (0.2 + Math.random() * 0.6), b.bottom - 40, { mood: 'hop', stay: 2400 }); }
+        } else if (r < 0.9) { mood('hop'); setTimeout(() => mood('hop'), 650); } // nhảy tại chỗ cho vui
+        else grow(2600, GROW_LINES[(Math.random() * GROW_LINES.length) | 0]); // phóng to cho vui
+      }
+      wander();
+    }, 22000 + Math.random() * 20000);
+  }
+
+  // ngủ gật sau 2 phút không tương tác, thức dậy khi người học quay lại
+  let napT = 0;
+  function wake() {
+    clearTimeout(napT); napT = setTimeout(nap, 120000);
+    if (Move.sleeping) { Move.sleeping = false; AL.Mascot3D && AL.Mascot3D.sleep(false); $('#mascot').classList.remove('napping'); grow(1400); }
+  }
+  function nap() {
+    if (reduce() || document.querySelector('dialog[open]')) return wake();
+    Move.sleeping = true; home(); AL.Mascot3D && AL.Mascot3D.sleep(true); $('#mascot').classList.add('napping');
+  }
+
+  // chạy tới nơi vừa có sự kiện
+  function react(s, ch) {
+    if (ch.tab) setTimeout(() => visitEl(document.getElementById('tab-' + s.tab), { mood: 'hop', stay: 2600 }), 250);
+    if (ch.line && s.line) {
+      const info = D.line(s.line), spec = document.getElementById('spec');
+      if (info && spec && info.nm >= 380 && info.nm <= 780) { const b = spec.getBoundingClientRect(); visit(b.left + ((info.nm - 380) / 400) * b.width, b.top - 40, { mood: 'think', stay: 4200 }); }
+    }
+  }
+  function hookWin() {
+    const orig = AL.app.win.bind(AL.app);
+    AL.app.win = (text) => {
+      orig(text);
+      const chip = document.getElementById('challenge');
+      if (chip && free()) { const r = chip.getBoundingClientRect(); visit(r.left + r.width / 2, r.bottom + 70, { mood: 'win', stay: 3200 }); setTimeout(() => grow(2000), 900); }
+    };
+  }
+
   function mount() {
     if (!AL.app || !$('#mascot')) return setTimeout(mount, 100);
     build();
@@ -166,9 +255,22 @@
     document.addEventListener('click', (e) => { if (menu && !menu.hidden && !e.target.closest('#buddy-menu, #mascot')) close(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu && !menu.hidden) { e.stopPropagation(); close(); m.focus(); } }, true);
     AL.store.on(onState);
+    AL.store.on(react);
+    hookWin(); wander(); wake();
+    ['pointerdown', 'keydown', 'wheel'].forEach((e) => window.addEventListener(e, wake, { passive: true }));
+    // mở cửa sổ hoặc menu → Sên về chỗ cũ ngay
+    document.querySelectorAll('dialog').forEach((d) => new MutationObserver(() => { if (d.open) { clearTimeout(Move.busy); go(0, 0); } }).observe(d, { attributes: true, attributeFilter: ['open'] }));
+    // chỉ đưa Sên về khi cửa sổ đổi kích thước làm nó lọt ra ngoài màn hình
+    let rz = 0;
+    window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => {
+      const r = $('#mascot').getBoundingClientRect();
+      if (r.left < 0 || r.top < 0 || r.right > window.innerWidth || r.bottom > window.innerHeight) go(0, 0);
+    }, 300); });
     seenTab[tab()] = true; // thí nghiệm đầu tiên đã có lời chào mừng riêng
     watchCodex(); watchQuiz(); follow(); idle();
-    AL.Buddy = { say, hint, explain, open, close };
+    // nhấp đúp vào Sên: phóng to
+    m.addEventListener('dblclick', (e) => { e.preventDefault(); close(); grow(2400, 'Hi! Mình đây!'); });
+    AL.Buddy = { say, hint, explain, open, close, visit, visitEl, grow, home: () => go(0, 0) };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
 })();

@@ -932,3 +932,24 @@ sup { font-size: 0.68em; line-height: 0; vertical-align: 0.5em; }
 .about-list li > span { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border-radius: 9px; background: var(--surface-3); font-size: 15px; }
 .contact-list { margin: 4px 0 0; padding-left: 18px; }
 .contact-list li { margin: 3px 0; }
+
+/* Sên di chuyển */
+#mascot { transition: transform 1.2s cubic-bezier(.45, .05, .3, 1); }
+#mascot.in-dialog { translate: none !important; }
+.mascot.bubble-left .mascot-bubble { right: auto; left: 74px; border-radius: 12px 12px 12px 2px; transform-origin: bottom left; }
+.mascot.napping::before { content: "z z z"; position: absolute; right: 4px; top: -14px; font: 700 12px var(--f-display); letter-spacing: 2px; color: #cbb8ff; animation: zz 2.4s ease-in-out infinite; pointer-events: none; }
+@keyframes zz { 0% { opacity: 0; transform: translate(0, 6px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, -10px); } }
+@media (prefers-reduced-motion: reduce) { #mascot { transition: none; } }
+
+/* Sên to hơn + hiệu ứng phóng to */
+.mascot { width: 96px; height: 96px; }
+.mascot-bubble { right: 92px; bottom: 26px; }
+.mascot.bubble-left .mascot-bubble { left: 92px; }
+.bd-menu { bottom: 104px; }
+#mascot { scale: 1; transform-origin: 50% 85%; transition: translate 1.2s cubic-bezier(.45, .05, .3, 1), scale .55s cubic-bezier(.3, 1.6, .5, 1); }
+#mascot.big { scale: 2.1; }
+#mascot.big .mascot-bubble { scale: 0.48; transform-origin: bottom right; }
+@media (max-width: 560px) { .mascot { width: 76px; height: 76px; } #mascot.big { scale: 1.6; } }
+#mascot.grow-corner { transform-origin: 100% 100%; }
+#mascot.big .mascot-bubble { right: 70px; }
+#mascot.big.bubble-left .mascot-bubble { right: auto; left: 70px; transform-origin: bottom left; }
