@@ -916,3 +916,19 @@ sup { font-size: 0.68em; line-height: 0; vertical-align: 0.5em; }
 .se3d-btn { white-space: nowrap; }
 .se3d-mode { position: absolute; left: 10px; top: 10px; z-index: 2; }
 .se3d-legend { bottom: 44px; }
+
+/* Giới thiệu */
+.modal-about { width: min(760px, calc(100vw - 32px)); }
+.about p { line-height: 1.72; }
+.about .about-lead { font-size: 16px; color: var(--text); }
+.about-quote { margin: 14px 0 6px; padding: 12px 16px; border-left: 3px solid var(--brand); border-radius: 0 12px 12px 0; background: var(--brand-soft); font-style: italic; color: #ffe2c4; }
+.about-cards { display: grid; gap: 8px; margin: 10px 0 14px; }
+.about-card { position: relative; padding: 12px 14px 12px 52px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--line); }
+.about-card .ac-n { position: absolute; left: 14px; top: 12px; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--brand); color: var(--brand-ink); font: 700 13px var(--f-display); }
+.about-card b { display: block; margin-bottom: 3px; font-family: var(--f-display); font-size: 15px; }
+.about-card p { margin: 0; font-size: 13.8px; color: #c6cfdd; }
+.about-list { list-style: none; padding: 0; margin: 8px 0 14px; display: grid; gap: 8px; }
+.about-list li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--line); font-size: 14px; line-height: 1.65; color: #d4dae5; }
+.about-list li > span { width: 30px; height: 30px; flex: none; display: grid; place-items: center; border-radius: 9px; background: var(--surface-3); font-size: 15px; }
+.contact-list { margin: 4px 0 0; padding-left: 18px; }
+.contact-list li { margin: 3px 0; }

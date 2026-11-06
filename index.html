@@ -320,30 +320,48 @@
 </dialog>
 
 <!-- ===== Giới thiệu ===== -->
-<dialog class="modal" id="dlg-about" aria-labelledby="about-title">
+<dialog class="modal modal-about" id="dlg-about" aria-labelledby="about-title">
   <div class="modal-head"><h2 id="about-title">Giới thiệu Aurora-LAB</h2><button type="button" class="icon-btn" data-close aria-label="Đóng">✕</button></div>
-  <div class="modal-body">
-    <p class="about-lead">Hầu hết những gì loài người biết về vũ trụ đều đến từ ánh sáng. <b>Aurora-LAB</b> được làm ra để bạn tự mình hiểu cách “đọc” thứ ánh sáng ấy.</p>
-    <p>Đây là phòng thí nghiệm ảo về ánh sáng của nguyên tử và cực quang, do <b>Nhóm Dự án Giáo dục Thiên văn &amp; Khoa học Thực nghiệm, CLB Thiên văn USAC</b> phát triển. Thay vì học thuộc định nghĩa, bạn tự tay “cấp năng lượng” cho electron, thay đổi năng lượng của dòng hạt đổ xuống khí quyển, đưa muối vào ngọn lửa, rồi nhìn quang phổ hình thành ngay trước mắt.</p>
-    <h3>Ba câu hỏi, một sợi chỉ xuyên suốt</h3>
-    <ul class="facts">
-      <li><b>Nguyên tử phát photon:</b> vì sao mỗi nguyên tố phát ra ánh sáng có màu riêng?</li>
-      <li><b>Cực quang theo độ cao:</b> vì sao bầu trời vùng cực sáng lên màu xanh lục, đỏ và tím?</li>
-      <li><b>Ngọn lửa → kính phân quang:</b> làm thế nào nhận ra một nguyên tố chỉ từ ánh sáng của nó?</li>
+  <div class="modal-body about">
+    <p class="about-lead">Học khoa học không đơn thuần là ghi nhớ những định luật, khái niệm hay kết quả đã được khám phá. Quan trọng hơn, đó là quá trình mỗi người học cách quan sát thế giới, đặt ra những câu hỏi, thử nghiệm các giả thuyết và từng bước tự tìm kiếm lời giải.</p>
+    <p><b>Aurora-LAB</b> được xây dựng từ tinh thần giáo dục ấy: đưa những hiện tượng khoa học vốn khó quan sát, những quá trình vật lý diễn ra ở quy mô nguyên tử hay trong không gian rộng lớn, trở thành những trải nghiệm trực quan mà người học có thể chủ động khám phá.</p>
+    <p>Đây là phòng thí nghiệm ảo về ánh sáng nguyên tử và hiện tượng cực quang, do <b>Nhóm Dự án Giáo dục Thiên văn và Khoa học Thực nghiệm – Câu lạc bộ Thiên văn USAC</b> phát triển. Thông qua các mô phỏng tương tác, người học có thể tự thay đổi mức năng lượng của electron, khảo sát sự tương tác giữa các hạt với khí quyển, quan sát ánh sáng phát ra khi các nguyên tố được nung nóng và tìm hiểu cách quang phổ được hình thành.</p>
+    <blockquote class="about-quote">Thay vì chỉ tiếp nhận một kết luận có sẵn, bạn được trực tiếp tham gia vào quá trình dẫn đến kết luận ấy.</blockquote>
+
+    <h3>Từ quan sát đến thấu hiểu</h3>
+    <p>Aurora-LAB tập trung vào ba nội dung có mối liên hệ chặt chẽ với nhau, cùng khai mở một trong những phương pháp quan trọng nhất mà con người sử dụng để tìm hiểu vũ trụ: nghiên cứu ánh sáng.</p>
+    <div class="about-cards">
+      <div class="about-card"><span class="ac-n">1</span><b>Sự phát xạ photon từ nguyên tử</b><p>Điều gì xảy ra khi electron hấp thụ năng lượng và chuyển lên mức năng lượng cao hơn? Vì sao khi trở về trạng thái năng lượng thấp hơn, nguyên tử lại phát ra những photon có năng lượng xác định, tạo nên các vạch quang phổ đặc trưng?</p></div>
+      <div class="about-card"><span class="ac-n">2</span><b>Cực quang và sự phát sáng của khí quyển</b><p>Những hạt mang điện, được gió Mặt Trời tiếp năng lượng, tương tác với các nguyên tử và phân tử trong khí quyển như thế nào? Vì sao độ cao và thành phần khí quyển lại góp phần tạo nên những màu sắc khác nhau của cực quang?</p></div>
+      <div class="about-card"><span class="ac-n">3</span><b>Từ ngọn lửa đến quang phổ</b><p>Ánh sáng phát ra khi các nguyên tố được nung nóng có thể tiết lộ điều gì về thành phần vật chất? Bằng cách nào một vạch sáng trong quang phổ có thể trở thành dấu hiệu nhận biết một nguyên tố?</p></div>
+    </div>
+    <p>Ba nội dung này cùng hướng đến một nguyên lý nền tảng: <b>ánh sáng mang theo thông tin về vật chất đã phát ra hoặc tương tác với nó.</b> Mỗi nguyên tố có hệ thống mức năng lượng và những đặc trưng quang phổ riêng. Nhờ nghiên cứu những đặc trưng ấy, các nhà khoa học có thể xác định thành phần hóa học, nhiệt độ và nhiều tính chất vật lý của những thiên thể ở cách Trái Đất hàng nghìn, thậm chí hàng triệu năm ánh sáng.</p>
+    <p>Từ một thí nghiệm nhỏ về ánh sáng trong phòng học, người học có thể tiếp cận một phương pháp nghiên cứu đã mở ra cánh cửa để con người tìm hiểu những ngôi sao, tinh vân và các thiên hà xa xôi.</p>
+
+    <h3>Triết lý giáo dục phía sau Aurora-LAB</h3>
+    <p>Chúng tôi tin rằng một trải nghiệm giáo dục khoa học có ý nghĩa không chỉ nằm ở lượng kiến thức mà người học tiếp nhận, mà còn ở những câu hỏi được khơi gợi và khả năng tự mình khám phá được hình thành sau quá trình học tập.</p>
+    <p>Aurora-LAB được phát triển dựa trên một số định hướng:</p>
+    <ul class="about-list">
+      <li><span aria-hidden="true">🔍</span><div><b>Học tập thông qua khám phá:</b> Người học không chỉ quan sát kết quả mà còn chủ động thay đổi các điều kiện của thí nghiệm, theo dõi sự biến đổi và tìm hiểu mối quan hệ giữa nguyên nhân với kết quả.</div></li>
+      <li><span aria-hidden="true">👁</span><div><b>Trực quan hóa những điều khó quan sát:</b> Những quá trình diễn ra ở cấp độ nguyên tử, những bức xạ mắt người không nhìn thấy hay các hiện tượng trong khí quyển ở độ cao hàng trăm kilomet được tái hiện thông qua mô phỏng, giúp kiến thức trừu tượng trở nên dễ tiếp cận hơn.</div></li>
+      <li><span aria-hidden="true">🔗</span><div><b>Kết nối lý thuyết với thực nghiệm:</b> Các khái niệm vật lý không tồn tại tách biệt trong sách giáo khoa, mà được đặt trong những tình huống quan sát và thử nghiệm cụ thể. Người học có cơ hội liên hệ giữa mô hình, hiện tượng và cách giải thích khoa học.</div></li>
+      <li><span aria-hidden="true">📐</span><div><b>Lấy tính chính xác khoa học làm nền tảng:</b> Dữ liệu quang phổ được tham chiếu từ <b>NIST Atomic Spectra Database</b>; các kiến thức về cực quang được đối chiếu với những công trình khoa học có bình duyệt và tài liệu chuyên môn từ <b>NOAA Space Weather Prediction Center (SWPC)</b>. Nội dung được trình bày theo hướng dễ hiểu nhưng vẫn tôn trọng cơ sở khoa học của vấn đề (xem mục <button type="button" class="link-btn inline" data-goref>Tài liệu tham khảo</button>).</div></li>
+      <li><span aria-hidden="true">🌏</span><div><b>Mở rộng cơ hội tiếp cận khoa học:</b> Không phải trường học nào cũng có đầy đủ thiết bị thí nghiệm quang phổ. Bằng việc xây dựng môi trường mô phỏng trên nền tảng web, Aurora-LAB mong muốn góp phần giảm bớt những rào cản về thiết bị và điều kiện học tập, tạo thêm cơ hội khám phá khoa học cho học sinh, sinh viên, giáo viên và cộng đồng yêu thiên văn.</div></li>
     </ul>
-    <p>Cả ba cùng dẫn tới một ý: <b>mỗi nguyên tố có một “dấu vân tay ánh sáng” riêng</b>. Hiểu được điều này, bạn cũng hiểu vì sao các nhà thiên văn biết được thành phần của những ngôi sao cách xa hàng nghìn năm ánh sáng.</p>
-    <h3>Vì sao chúng tôi làm Aurora-LAB?</h3>
-    <ul class="facts">
-      <li><b>Học bằng cách làm:</b> thí nghiệm quang phổ thật cần đèn khí, muối kim loại và kính phân quang, không phải lớp học nào cũng có. Ở đây, bạn chỉ cần một trình duyệt.</li>
-      <li><b>Thấy được điều mắt thường không thấy:</b> electron chuyển mức, photon tử ngoại, hay cực quang ở độ cao hàng trăm kilomet.</li>
-      <li><b>Chuẩn xác mà vẫn gần gũi:</b> số liệu lấy từ <b>NIST Atomic Spectra Database</b>, kiến thức đối chiếu với các bài báo khoa học có bình duyệt và tài liệu của <b>NOAA SWPC</b>, nhưng được kể bằng lời dễ hiểu (xem <button type="button" class="link-btn inline" data-goref>Tài liệu tham khảo</button>).</li>
-      <li><b>Mở cho mọi người:</b> học sinh, sinh viên, giáo viên dùng trong tiết học, hay bất kỳ ai từng ngước nhìn bầu trời và tò mò.</li>
-    </ul>
-    <p>Aurora-LAB là một phần trong hệ sinh thái giáo dục của CLB Thiên văn USAC (Trường Đại học Khoa học Tự nhiên, ĐHQG-HCM), cùng chung sứ mệnh <i>lan tỏa thiên văn học đến cộng đồng</i>. Tìm hiểu thêm về USAC tại <a href="https://web.clbtvusac.com" target="_blank" rel="noopener">web.clbtvusac.com</a>.</p>
+
+    <h3>Khoa học bắt đầu từ sự tò mò</h3>
+    <p>Aurora-LAB không đặt mục tiêu thay thế những thí nghiệm thực tế hay vai trò của người giảng dạy. Thay vào đó, dự án mong muốn trở thành một môi trường bổ trợ, nơi người học có thể tự do quan sát, thử nghiệm và hình thành những câu hỏi của riêng mình.</p>
+    <p>Bởi lẽ, hiểu một hiện tượng không chỉ là biết nó xảy ra như thế nào, mà còn là hiểu vì sao nó xảy ra và bằng cách nào chúng ta có thể kiểm chứng lời giải thích ấy.</p>
+    <p>Aurora-LAB là một phần trong hệ sinh thái giáo dục của <b>Câu lạc bộ Thiên văn USAC – Trường Đại học Khoa học Tự nhiên, ĐHQG-HCM</b>, được phát triển với cùng một định hướng: đưa tri thức khoa học đến gần hơn với cộng đồng, đồng thời khơi dậy tinh thần tìm tòi và tư duy khoa học trong mỗi người.</p>
+
     <div class="contact">
-      <p class="contact-h">CLB Thiên văn USAC - Lan toả thiên văn đến cộng đồng</p>
-      <p>Mọi sự góp ý và liên hệ xin gửi về email: <a href="mailto:clb.usac@gmail.com">clb.usac@gmail.com</a></p>
-      <p>Fanpage CLB Thiên văn USAC: <a href="https://www.facebook.com/clbusac" target="_blank" rel="noopener">https://www.facebook.com/clbusac</a></p>
+      <p class="contact-h">CLB Thiên văn USAC – Lan tỏa Thiên văn học đến cộng đồng.</p>
+      <p>Mọi ý kiến đóng góp, phản hồi và đề xuất cải tiến Aurora-LAB xin gửi về:</p>
+      <ul class="contact-list">
+        <li>Email: <a href="mailto:clb.usac@gmail.com">clb.usac@gmail.com</a></li>
+        <li>Fanpage: <a href="https://www.facebook.com/clbusac" target="_blank" rel="noopener">Câu lạc bộ Thiên văn USAC</a></li>
+        <li>Website: <a href="https://web.clbtvusac.com/" target="_blank" rel="noopener">web.clbtvusac.com</a></li>
+      </ul>
     </div>
   </div>
 </dialog>
