@@ -914,3 +914,5 @@ sup { font-size: 0.68em; line-height: 0; vertical-align: 0.5em; }
 .se3d-btn:hover { border-color: #7fb6ff; color: #fff; }
 .se3d-btn[hidden] { display: none; }
 .se3d-btn { white-space: nowrap; }
+.se3d-mode { position: absolute; left: 10px; top: 10px; z-index: 2; }
+.se3d-legend { bottom: 44px; }

@@ -20,7 +20,7 @@ export function create(host, getState) {
       <span><i style="background:#ff9c5a;opacity:.6"></i>Sóng xung kích</span>
       <span><i class="se3d-au"></i>Vành cực quang</span>
     </div>
-    <div class="se3d-hint">Kéo để xoay · cuộn để phóng to · nhấp đúp để đặt lại<br><span>Kích thước và khoảng cách không theo tỉ lệ thật</span></div>`;
+    <div class="se3d-hint">Kéo để xoay · cuộn để phóng to · nhấp đúp để đặt lại<br><span>Kích thước, khoảng cách và tốc độ quỹ đạo không theo tỉ lệ thật (1 vòng ≈ 80 giây thay vì 1 năm)</span></div>`;
   host.append(wrap);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -29,14 +29,24 @@ export function create(host, getState) {
   wrap.prepend(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
-  const HOME = new THREE.Vector3(-10, 13, 36);
-  cam.position.copy(HOME);
+  // Góc nhìn hẹp (28°) để vật thể hình cầu không bị méo ở mép khung
+  const cam = new THREE.PerspectiveCamera(28, 1, 0.1, 600);
   const ctl = new OrbitControls(cam, renderer.domElement);
-  ctl.enableDamping = true; ctl.minDistance = 4; ctl.maxDistance = 90; ctl.target.set(-13, 0, 0);
-  ctl.autoRotate = true; ctl.autoRotateSpeed = 0.35;
+  ctl.enableDamping = true; ctl.minDistance = 4; ctl.maxDistance = 220;
+  let follow = true; // true: bám theo Trái Đất · false: toàn cảnh quỹ đạo
+  const sys = new THREE.Group(); scene.add(sys); // hệ Trái Đất + từ quyển + gió, trục −x luôn hướng về Mặt Trời
+  const home = () => {
+    if (follow) { const p = sys.position; ctl.target.set(p.x - Math.cos(orbitA) * 10, 0, p.z + Math.sin(orbitA) * 10); cam.position.set(ctl.target.x + 18, 16, ctl.target.z + 44); }
+    else { ctl.target.set(0, 0, 0); cam.position.set(0, 70, 105); }
+    ctl.update();
+  };
   renderer.domElement.addEventListener('pointerdown', () => (ctl.autoRotate = false));
-  renderer.domElement.addEventListener('dblclick', () => { cam.position.copy(HOME); ctl.target.set(-13, 0, 0); ctl.autoRotate = true; });
+  renderer.domElement.addEventListener('dblclick', home);
+  const modeBtn = document.createElement('button');
+  modeBtn.type = 'button'; modeBtn.className = 'se3d-btn se3d-mode';
+  const paintMode = () => (modeBtn.textContent = follow ? '🔭 Toàn cảnh quỹ đạo' : '🌍 Bám theo Trái Đất');
+  modeBtn.onclick = () => { follow = !follow; paintMode(); home(); };
+  paintMode(); wrap.append(modeBtn);
 
   // ---- nền sao ----
   {
@@ -49,9 +59,15 @@ export function create(host, getState) {
     scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size: 0.6, sizeAttenuation: true, transparent: true, opacity: 0.7 })));
   }
 
-  // ---- Mặt Trời ----
-  const sun = new THREE.Mesh(new THREE.SphereGeometry(5, 48, 32), new THREE.MeshBasicMaterial({ color: 0xffc35a }));
-  sun.position.set(SUN_X, 0, 0); scene.add(sun);
+  // ---- Mặt Trời (tại gốc tọa độ) ----
+  const sun = new THREE.Mesh(new THREE.SphereGeometry(5, 64, 48), new THREE.MeshBasicMaterial({ color: 0xffc35a }));
+  scene.add(sun);
+  // quỹ đạo Trái Đất (vòng mờ)
+  {
+    const pts = []; for (let i = 0; i <= 256; i++) { const a = (i / 256) * Math.PI * 2; pts.push(new THREE.Vector3(Math.cos(a) * -SUN_X, 0, -Math.sin(a) * -SUN_X)); }
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0x8fa6c8, transparent: true, opacity: 0.25 })));
+  }
+  let orbitA = 0;
   const glowTex = (() => {
     const c = document.createElement('canvas'); c.width = c.height = 256;
     const x = c.getContext('2d'), g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
@@ -61,13 +77,14 @@ export function create(host, getState) {
   })();
   const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
   sunGlow.scale.set(26, 26, 1); sun.add(sunGlow);
-  const sunLight = new THREE.DirectionalLight(0xffffff, 2.6); sunLight.position.set(SUN_X, 0, 0); scene.add(sunLight);
+  const sunLight = new THREE.PointLight(0xffffff, 3.2, 0, 0); scene.add(sunLight); // ánh sáng tỏa từ Mặt Trời
   scene.add(new THREE.AmbientLight(0x404a66, 0.35));
 
   // ---- Trái Đất (nghiêng trục ~23,4°) ----
-  const earthTilt = new THREE.Group(); earthTilt.rotation.z = -0.41; scene.add(earthTilt);
+  const earthTilt = new THREE.Group(); sys.add(earthTilt);
+  const TILT_Q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -0.41); // trục giữ hướng cố định trong không gian
   const earthMat = new THREE.MeshStandardMaterial({ color: 0x3a6fd0, roughness: 0.85, metalness: 0 });
-  const earth = new THREE.Mesh(new THREE.SphereGeometry(RE, 64, 48), earthMat); earthTilt.add(earth);
+  const earth = new THREE.Mesh(new THREE.SphereGeometry(RE, 96, 64), earthMat); earthTilt.add(earth);
   new THREE.TextureLoader().setCrossOrigin('anonymous').load(TEX, (t) => { t.colorSpace = THREE.SRGBColorSpace; earthMat.map = t; earthMat.color.set(0xffffff); earthMat.needsUpdate = true; });
   const atmo = new THREE.Mesh(new THREE.SphereGeometry(RE * 1.06, 48, 32), new THREE.MeshBasicMaterial({ color: 0x6fb4ff, transparent: true, opacity: 0.12, side: THREE.BackSide, depthWrite: false }));
   earthTilt.add(atmo);
@@ -76,15 +93,15 @@ export function create(host, getState) {
   const ovalMat = new THREE.MeshBasicMaterial({ color: 0x7dff72, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false });
   const ovals = [1, -1].map((s) => {
     const m = new THREE.Mesh(new THREE.TorusGeometry(RE * 0.42, 0.045, 10, 80), ovalMat);
-    m.rotation.x = Math.PI / 2; m.position.y = s * RE * 0.92; earthTilt.add(m); return m;
+    m.rotation.x = Math.PI / 2; m.position.y = s * RE * 0.92; sys.add(m); return m;
   });
   const ovalHalo = [1, -1].map((s) => {
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x7dff72, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending }));
-    sp.scale.set(1.6, 1.6, 1); sp.position.y = s * RE * 1.0; earthTilt.add(sp); return sp;
+    sp.scale.set(1.6, 1.6, 1); sp.position.y = s * RE * 1.0; sys.add(sp); return sp;
   });
 
   // ---- từ quyển: đường sức dạng lưỡng cực, bị ép phía ngày (hướng Mặt Trời, x < 0), kéo dài phía đêm ----
-  const fieldGroup = new THREE.Group(); earthTilt.add(fieldGroup);
+  const fieldGroup = new THREE.Group(); sys.add(fieldGroup); // từ quyển định hướng theo gió Mặt Trời
   const fieldMat = new THREE.LineBasicMaterial({ color: 0x7fb6ff, transparent: true, opacity: 0.45 });
   const bowMat = new THREE.MeshBasicMaterial({ color: 0xff9c5a, transparent: true, opacity: 0.045, side: THREE.DoubleSide, depthWrite: false, wireframe: false });
   const bowWire = new THREE.LineBasicMaterial({ color: 0xff9c5a, transparent: true, opacity: 0.12 });
@@ -113,7 +130,7 @@ export function create(host, getState) {
       }
     }
     // sóng xung kích + ranh giới từ quyển (mặt paraboloid quanh trục Mặt Trời – Trái Đất)
-    if (bow) { scene.remove(bow, bowLines); bow.geometry.dispose(); bowLines.geometry.dispose(); }
+    if (bow) { sys.remove(bow, bowLines); bow.geometry.dispose(); bowLines.geometry.dispose(); }
     const prof = [];
     const sx = r0 * 1.35;
     for (let i = 0; i <= 24; i++) { const y = (i / 24) * 7.5; prof.push(new THREE.Vector2(y, -sx + (y * y) / (4.2 * sx) * 1.0)); }
@@ -121,16 +138,23 @@ export function create(host, getState) {
     geo.scale(-1, 1, 1);
     bow = new THREE.Mesh(geo, bowMat);
     bowLines = new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.LatheGeometry(prof.filter((_, i) => i % 4 === 0), 16).rotateZ(Math.PI / 2).scale(-1, 1, 1)), bowWire);
-    scene.add(bow, bowLines);
+    sys.add(bow, bowLines);
   };
 
   // ---- gió Mặt Trời: hạt bay từ Mặt Trời, vòng qua từ quyển; một phần đổ theo đường sức xuống cực ----
   const N = 900, pPos = new Float32Array(N * 3), pCol = new Float32Array(N * 3);
   const pg = new THREE.BufferGeometry();
   pg.setAttribute('position', new THREE.BufferAttribute(pPos, 3)); pg.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
-  const pts = new THREE.Points(pg, new THREE.PointsMaterial({ size: 0.32, vertexColors: true, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+  const dotTex = (() => { // hạt tròn, mép mềm
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.45, 'rgba(255,255,255,.85)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = g; x.beginPath(); x.arc(32, 32, 32, 0, Math.PI * 2); x.fill();
+    return new THREE.CanvasTexture(c);
+  })();
+  const pts = new THREE.Points(pg, new THREE.PointsMaterial({ size: 0.42, map: dotTex, alphaTest: 0.02, vertexColors: true, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
   pts.frustumCulled = false; // vị trí thay đổi liên tục, không dùng khối bao cố định
-  scene.add(pts);
+  sys.add(pts);
   const P =Array.from({ length: N }, () => ({ alive: false }));
   const WIND = new THREE.Color(0xffd27a), DOWN = new THREE.Color(0x9dffb0);
   const spawn = (p) => {
@@ -150,6 +174,13 @@ export function create(host, getState) {
     ovalMat.opacity = 0.4 + 0.55 * flux;
     ovals.forEach((o) => { const k = 0.42 + 0.14 * flux; o.scale.set(k / 0.42, k / 0.42, 1); }); // bão mạnh → vành mở rộng về phía xích đạo
     earth.rotation.y += dt * 0.12;
+    // Trái Đất quay quanh Mặt Trời (rất nhanh so với thực tế: 1 vòng ≈ 80 s thay vì 1 năm)
+    const prev = sys.position.clone();
+    orbitA += dt * (Math.PI * 2 / 80);
+    sys.position.set(Math.cos(orbitA) * -SUN_X, 0, -Math.sin(orbitA) * -SUN_X);
+    sys.rotation.y = orbitA; // trục −x của hệ luôn chỉ về Mặt Trời
+    earthTilt.quaternion.copy(sys.quaternion).invert().multiply(TILT_Q);
+    if (follow) { const d = sys.position.clone().sub(prev); cam.position.add(d); ctl.target.add(d); }
     // hạt
     const rate = 120 + 360 * flux; let toSpawn = rate * dt;
     for (let i = 0; i < N; i++) {
@@ -176,7 +207,7 @@ export function create(host, getState) {
         p.u += (p.dir > 0 ? -1 : 1) * dt * 22;
         const idx = Math.round(p.u);
         if (idx <= 0 || idx >= p.line.length - 1) { p.alive = false; continue; }
-        const q = p.line[idx].clone().applyEuler(earthTilt.rotation);
+        const q = p.line[idx];
         pCol.set([DOWN.r, DOWN.g, DOWN.b], i * 3);
         pPos.set([q.x, q.y, q.z], i * 3);
       }
@@ -196,6 +227,8 @@ export function create(host, getState) {
     step(dt); ctl.update(); renderer.render(scene, cam);
     raf = requestAnimationFrame(loop);
   };
+  sys.position.set(-SUN_X, 0, 0);
+  home();
   const show = (on) => {
     wrap.hidden = !on; cancelAnimationFrame(raf); running = on;
     if (on) { fit(); last = performance.now(); raf = requestAnimationFrame(loop); }
